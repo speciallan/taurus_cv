@@ -1,2 +1,3 @@
 model/faster_rcnn/__pycache__
 *.h5
+*.pyc

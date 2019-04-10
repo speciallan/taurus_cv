@@ -1,0 +1,1 @@
+python train.py --init_weight_path=/tmp/frcnn-rcnn.h5 --init_epochs=40 --epochs=70

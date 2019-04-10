@@ -3,15 +3,12 @@
 # Author:Speciallan
 
 """
-Mask R-CNN
-Base Configurations class.
-
-Copyright (c) 2017 Matterport, Inc.
-Licensed under the MIT License (see LICENSE for details)
-Written by Waleed Abdulla
+系统级默认配置文件
 """
 
 import numpy as np
+import configparser
+from pretrained_models.get import get as get_pretrained_model
 
 # Faster_rcnn 基础配置
 
@@ -137,11 +134,13 @@ class VocConfig(Config):
                      'aeroplane': 20
                      }
 
-    pretrained_weights = './pretrained_model/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
+    pretrained_weights = get_pretrained_model(network=Config.BACKBONE, weight='imagenet')
 
+    config_filepath = './config.ini'
     rpn_weights = '/tmp/frcnn-rpn.h5'
     rcnn_weights = '/tmp/frcnn-rcnn.h5'
     voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
+    log_path = './logs'
 
 # Coco数据集配置
 class CocoConfig(Config):
@@ -153,7 +152,8 @@ class MacVocConfig(VocConfig):
 
 # 家里的linux voc配置
 class LinuxVocConfig(VocConfig):
-    pass
+    username = ''
+    voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
 
 # 实验室voc配置
 class LabVocConfig(VocConfig):
@@ -162,3 +162,13 @@ class LabVocConfig(VocConfig):
 
 # 当前配置
 current_config = LinuxVocConfig()
+
+# 获取用户配置
+cf = configparser.ConfigParser()
+cf.read(current_config.config_filepath)
+sections = cf.sections()
+for k,section in enumerate(sections):
+    user_config = cf.items(section)
+    for k2,v in enumerate(user_config):
+        current_config.__setattr__(v[0], v[1])
+

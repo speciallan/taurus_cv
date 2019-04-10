@@ -3,6 +3,10 @@
 # Author:Speciallan
 
 from . import datasets
-from . import model
+from . import layers
+from . import models
+from . import pretrained_models
 from . import utils
 from . import visualization
+
+__ALL__ = ['layers']

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author:Speciallan
+
 """
 通用获取PASCAL VOC公共数据集
 """
@@ -9,7 +10,7 @@ import os
 import xml.etree.cElementTree as ET
 
 # 获取voc数据
-def get_voc_data(input_path, class_mapping):
+def get_voc_dataset(input_path, class_mapping):
 
     all_imgs = []
 

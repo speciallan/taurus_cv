@@ -2,4 +2,5 @@
 # -*- coding:utf-8 -*-
 # Author:Speciallan
 
-from . import image
+from . import get
+
