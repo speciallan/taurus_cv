@@ -21,7 +21,8 @@ def get(network='resnet50', weight='imagenet'):
 
     # 不存在，则下载 speciallan.cn
     if not os.path.exists(filename):
-        pass
+        print('请下载预训练模型到预训练目录')
+        exit()
 
     return os.path.dirname(os.path.abspath(__file__)) + filename
 

@@ -8,6 +8,7 @@
 
 import numpy as np
 import configparser
+import os
 from pretrained_models.get import get as get_pretrained_model
 
 # Faster_rcnn 基础配置
@@ -141,6 +142,9 @@ class VocConfig(Config):
     rcnn_weights = '/tmp/frcnn-rcnn.h5'
     voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
     log_path = './logs'
+
+    if not os.path.exists(log_path):
+        os.mkdir(log_path)
 
 # Coco数据集配置
 class CocoConfig(Config):
