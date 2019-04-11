@@ -138,10 +138,13 @@ class VocConfig(Config):
     pretrained_weights = get_pretrained_model(network=Config.BACKBONE, weight='imagenet')
 
     config_filepath = './config.ini'
-    rpn_weights = '/tmp/frcnn-rpn.h5'
-    rcnn_weights = '/tmp/frcnn-rcnn.h5'
+    rpn_weights = '/tmp/faster-rcnn-rpn.h5'
+    rcnn_weights = '/tmp/faster-rcnn-rcnn.h5'
     voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
     log_path = './logs'
+
+    if not os.path.exists(config_filepath):
+        print('找不到实验的config.ini')
 
     if not os.path.exists(log_path):
         os.mkdir(log_path)
@@ -171,6 +174,7 @@ current_config = LinuxVocConfig()
 cf = configparser.ConfigParser()
 cf.read(current_config.config_filepath)
 sections = cf.sections()
+
 for k,section in enumerate(sections):
     user_config = cf.items(section)
     for k2,v in enumerate(user_config):

@@ -12,6 +12,8 @@ from keras import layers, backend
 from keras.models import Model
 from keras.layers import Input, Lambda, Conv2D, Reshape, TimeDistributed
 
+from models.resnet.resnet50 import resnet50
+
 from .anchors import Anchor
 from .target import RpnTarget, DetectTarget
 from .proposals import RpnToProposal
@@ -20,15 +22,12 @@ from .losses import rpn_cls_loss, rpn_regress_loss, detect_regress_loss, detect_
 from .specific_to_agnostic import deal_delta
 from .detect_boxes import ProposalToDetectBox
 from .clip_boxes import ClipBoxes, UniqueClipBoxes
-from models.resnet.resnet50 import resnet50
+
 
 def rpn_net(config, stage='train'):
 
     batch_size = config.IMAGES_PER_GPU
-    # input_image = Input(shape=image_shape)
-    # input_class_ids = Input(shape=(max_gt_num, 1 + 1))
-    # input_boxes = Input(shape=(max_gt_num, 4 + 1))
-    # input_image_meta = Input(shape=(12,))
+
     input_image = Input(batch_shape=(batch_size,) + config.IMAGE_INPUT_SHAPE)
     input_class_ids = Input(batch_shape=(batch_size, config.MAX_GT_INSTANCES, 1 + 1))
     input_boxes = Input(batch_shape=(batch_size, config.MAX_GT_INSTANCES, 4 + 1))
@@ -70,7 +69,7 @@ def rpn_net(config, stage='train'):
 
         return Model(inputs=[input_image, input_image_meta], outputs=[detect_boxes, class_scores])
 
-def frcnn(config, stage='train'):
+def faster_rcnn(config, stage='train'):
 
     batch_size = config.IMAGES_PER_GPU
     # input_image = Input(batch_shape=(batch_size,)+image_shape)
@@ -83,7 +82,7 @@ def frcnn(config, stage='train'):
     gt_boxes = Input(shape=(config.MAX_GT_INSTANCES, 4 + 1))
     input_image_meta = Input(shape=(12,))
 
-    # 特征及预测结果
+    # 通过CNN提取特征
     features = resnet50(input_image)
 
     # 训练rpn 得到回归和分类分
@@ -100,15 +99,19 @@ def frcnn(config, stage='train'):
     windows = Lambda(lambda x: x[:, 7:11])(input_image_meta)
     # anchors = ClipBoxes()([anchors, windows])
 
-    # 应用分类和回归生成proposal
+    # 应用分类和回归生成proposal，通过NMS后保留2000个候选框
     output_box_num = config.POST_NMS_ROIS_TRAINING if stage == 'train' else config.POST_NMS_ROIS_INFERENCE
-    proposal_boxes, _, _ = RpnToProposal(batch_size, output_box_num=output_box_num,
+    proposal_boxes, _, _ = RpnToProposal(batch_size,
+                                         output_box_num=output_box_num,
                                          iou_threshold=config.RPN_NMS_THRESHOLD,
                                          name='rpn2proposals')([boxes_regress, class_logits, anchors])
     # proposal裁剪到图像窗口内
     proposal_boxes_coordinate, proposal_boxes_tag = Lambda(lambda x: [x[..., :4], x[..., 4:]])(proposal_boxes)
+
     # windows = Lambda(lambda x: x[:, 7:11])(input_image_meta)
+    # 边框裁剪层
     proposal_boxes_coordinate = ClipBoxes()([proposal_boxes_coordinate, windows])
+
     # 最后再合并tag返回
     proposal_boxes = Lambda(lambda x: tf.concat(x, axis=-1))([proposal_boxes_coordinate, proposal_boxes_tag])
 
@@ -171,45 +174,46 @@ def compile(keras_model, config, loss_names=[]):
     :return:
     """
     # 优化目标
-    optimizer = keras.optimizers.SGD(
-        lr=config.LEARNING_RATE, momentum=config.LEARNING_MOMENTUM,
-        clipnorm=config.GRADIENT_CLIP_NORM)
+    optimizer = keras.optimizers.SGD(lr=config.LEARNING_RATE,
+                                     momentum=config.LEARNING_MOMENTUM,
+                                     clipnorm=config.GRADIENT_CLIP_NORM)
+
     # 增加损失函数，首先清除之前的，防止重复
     keras_model._losses = []
     keras_model._per_input_losses = {}
 
+    # 添加损失到keras
     for name in loss_names:
         layer = keras_model.get_layer(name)
         if layer is None or layer.output in keras_model.losses:
             continue
-        loss = (tf.reduce_mean(layer.output, keepdims=True)
-                * config.LOSS_WEIGHTS.get(name, 1.))
+        loss = (tf.reduce_mean(layer.output, keepdims=True) * config.LOSS_WEIGHTS.get(name, 1.))
         keras_model.add_loss(loss)
 
     # 增加L2正则化
     # 跳过批标准化层的 gamma 和 beta 权重
-    reg_losses = [
-        keras.regularizers.l2(config.WEIGHT_DECAY)(w) / tf.cast(tf.size(w), tf.float32)
-        for w in keras_model.trainable_weights
-        if 'gamma' not in w.name and 'beta' not in w.name]
+    reg_losses = [keras.regularizers.l2(config.WEIGHT_DECAY)(w) / tf.cast(tf.size(w), tf.float32)
+                  for w in keras_model.trainable_weights if 'gamma' not in w.name and 'beta' not in w.name]
+
     keras_model.add_loss(tf.add_n(reg_losses))
 
     # 编译
-    keras_model.compile(
-        optimizer=optimizer,
-        loss=[None] * len(keras_model.outputs))  # 使用虚拟损失
+    keras_model.compile(optimizer=optimizer, loss=[None] * len(keras_model.outputs))  # 使用虚拟损失
 
     # 为每个损失函数增加度量
     for name in loss_names:
+
         if name in keras_model.metrics_names:
             continue
+
         layer = keras_model.get_layer(name)
         if layer is None:
             continue
+
         keras_model.metrics_names.append(name)
-        loss = (
-                tf.reduce_mean(layer.output, keepdims=True)
-                * config.LOSS_WEIGHTS.get(name, 1.))
+
+        loss = (tf.reduce_mean(layer.output, keepdims=True) * config.LOSS_WEIGHTS.get(name, 1.))
+
         keras_model.metrics_tensors.append(loss)
 
 

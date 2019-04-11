@@ -54,20 +54,16 @@ def resnet50(input):
 
 
 def identity_block(input_tensor, kernel_size, filters, stage, block):
-
-    """The identity block is the block that has no conv layer at shortcut.
-
-    # Arguments
-        input_tensor: input tensor
-        kernel_size: default 3, the kernel size of
-            middle conv layer at main path
-        filters: list of integers, the filters of 3 conv layer at main path
-        stage: integer, current stage label, used for generating layer names
-        block: 'a','b'..., current block label, used for generating layer names
-
-    # Returns
-        Output tensor for the block.
     """
+    残差连接
+    :param input_tensor: 输入张量
+    :param kernel_size: 卷积核大小
+    :param filters: 卷积核个数
+    :param stage: 阶段标记
+    :param block: 生成层名字
+    :return: Tensor
+    """
+
     filters1, filters2, filters3 = filters
     if backend.image_data_format() == 'channels_last':
         bn_axis = 3

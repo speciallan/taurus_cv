@@ -24,7 +24,7 @@ visualization 可视化
 
 ### 使用方法
 
-比如Faster rcnn，首先在experiments目录下创建自己的实验，然后配置好config.ini，里面包括了一些实验所需参数，预训练模型下载好放到pretrained_models目录中，然后执行实验里面的train.py即可。
+比如faster rcnn，首先在experiments目录下创建自己的实验，然后配置好config.ini，里面包括了一些实验所需参数，预训练模型下载好放到pretrained_models目录中，然后执行实验里面的train.py即可。
 
 ### 更新日志
 

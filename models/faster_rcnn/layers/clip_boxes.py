@@ -12,6 +12,7 @@ from ..utils import tf_utils
 
 
 class ClipBoxes(keras.layers.Layer):
+
     def __init__(self, **kwargs):
         super(ClipBoxes, self).__init__(**kwargs)
 
@@ -59,6 +60,7 @@ class UniqueClipBoxes(keras.layers.Layer):
         boxes = inputs
         wy1, wx1, wy2, wx2 = 0., 0., float(self.clip_box_shape[0]), float(self.clip_box_shape[1])
         y1, x1, y2, x2 = tf.split(boxes, 4, axis=-1)  # split后维数不变
+
         # 裁剪到窗口内
         y1 = tf.minimum(tf.maximum(y1, wy1), wy2)  # wy1<=y1<=wy2
         y2 = tf.minimum(tf.maximum(y2, wy1), wy2)
