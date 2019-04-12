@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-   File Name：     clip_boxes
-   Description :  边框裁剪层
-   Author :       mick.yi
-   date：          2019/3/5
+边框裁剪层
 """
 
 import keras
@@ -12,7 +12,9 @@ from ..utils import tf_utils
 
 
 class ClipBoxes(keras.layers.Layer):
-
+    """
+    裁剪
+    """
     def __init__(self, **kwargs):
         super(ClipBoxes, self).__init__(**kwargs)
 

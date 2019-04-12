@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-Created on 2018/11/13 10:11
-
-@author: mick.yi
-
+tensorflow工具
 """
 
 import tensorflow as tf
 # from deprecated import deprecated
+
 
 # @deprecated(reason='建议使用原生tf.map_fn;效率更高,并且不需要显示传入batch_size参数')
 def batch_slice(inputs, graph_fn, batch_size, names=None):

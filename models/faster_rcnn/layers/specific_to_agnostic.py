@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-   File Name：     specific_to_agnostic
-   Description :  处理类别相关的检测边框回归问题；将类别相关变为类别无关
-   Author :       mick.yi
-   date：          2019/2/14
+处理类别相关的检测边框回归问题；将类别相关变为类别无关
 """
+
 import tensorflow as tf
 from keras import backend
 

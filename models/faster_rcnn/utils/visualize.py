@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-Created on 2018/12/15 下午7:41
-
-@author: mick.yi
-
 可视化
-
 """
+
 import matplotlib.pyplot as plt
 from matplotlib import patches, lines
 import random
 import colorsys
 import numpy as np
+
 
 def random_colors(N, bright=True):
     """
@@ -24,6 +24,7 @@ def random_colors(N, bright=True):
     colors = list(map(lambda c: colorsys.hsv_to_rgb(*c), hsv))
     random.shuffle(colors)
     return colors
+
 
 # 画图方法
 def display_instances(image, boxes, class_ids, class_names,

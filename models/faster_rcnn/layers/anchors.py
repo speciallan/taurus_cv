@@ -44,11 +44,13 @@ class Anchor(keras.layers.Layer):
         features_shape = tf.shape(features)
         print("feature_shape:{}".format(features_shape))
 
-        # 根据feature_map生成初始anchors
+        # 根据feature_map生成初始anchors(9,4)
         base_anchors = generate_anchors(self.base_size, self.ratios, self.scales)
+
+        # 得到(M*N,9,4)的anchors
         anchors = shift(features_shape[1:3], self.strides, base_anchors)
 
-        # 扩展第一维，batch_size;每个样本都有相同的anchors
+        # 扩展第一维，batch_size;每个样本都有相同的anchors (1,M*N,9,4)
         anchors = tf.tile(tf.expand_dims(anchors, axis=0), [features_shape[0], 1, 1])
 
         return anchors
@@ -76,11 +78,11 @@ def generate_anchors(base_size, ratios, scales):
     ratios = np.expand_dims(np.array(ratios), axis=1)  # (N,1)
     scales = np.expand_dims(np.array(scales), axis=0)  # (1,M)
 
-    # 计算高度和宽度，形状为(N,M)
+    # 计算高度和宽度，h,w形状为(N,M)，这里是(3,3)
     h = np.sqrt(ratios) * scales * base_size
     w = 1.0 / np.sqrt(ratios) * scales * base_size
 
-    # reshape为（N*M,1)
+    # reshape为（N*M,1) 展平(9,1)
     h = np.reshape(h, (-1, 1))
     w = np.reshape(w, (-1, 1))
 
@@ -120,9 +122,20 @@ def shift(shape, strides, base_anchors):
 
 if __name__ == '__main__':
 
+    from utils.spe import spe
+
+    # arr1 = np.array([1, 2, 3])
+    # arr2 = np.array([4, 5, 6])
+    # spe(np.vstack((arr1, arr2)), np.hstack((arr1, arr2)))
+
     sess = tf.Session()
-    achrs = generate_anchors(64, [1], [1, 2, 4])
-    print(achrs)
+    achrs = generate_anchors(64, [0.5, 1, 2], [1, 2, 4])
+    # h,w
+    # (45,90) (90,180)  (180,360)
+    # (64,64) (128,128) (256,256)
+    # (90,45) (180,90)  (360,180)
+    spe(achrs.shape, achrs)
+
     all_achrs = shift([3, 3], 32, achrs)
     print(sess.run(tf.shape(all_achrs)))
     print(sess.run(all_achrs))

@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-   File Name：     detect_boxes
-   Description :  根据proposals以及rcnn的回归参数生成最终的检测边框
-   Author :       mick.yi
-   date：          2019/2/14
+根据proposals以及rcnn的回归参数生成最终的检测边框
 """
+
 import keras
 import tensorflow as tf
 from ..utils.tf_utils import apply_regress, pad_to_fixed_size

@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-   File Name：     eval_utils
-   Description :  评估工具类
-   Author :       mick.yi
-   date：          2019/3/2
+评估工具
 """
+
 import numpy as np
 from ..utils import np_utils
+
 
 def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0.05, max_boxes_num=100):
     """

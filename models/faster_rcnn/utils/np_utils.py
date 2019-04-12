@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-   File Name：     np_utils
-   Description :  numpy 工具类
-   Author :       mick.yi
-   date：          2019/1/31
+numpy工具
 """
+
 import numpy as np
 
 

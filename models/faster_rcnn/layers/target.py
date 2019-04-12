@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-Created on 2018/12/2 下午3:43
-
-@author: mick.yi
-
 分类回归目标层，包括rpn_target和detect_target
-
 """
+
 import keras
 import tensorflow as tf
 from ..utils import tf_utils
+
 
 def compute_iou(gt_boxes, anchors):
     """

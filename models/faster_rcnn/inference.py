@@ -29,8 +29,8 @@ def inference(output_dir):
     all_img_list = [info for info in dataset.get_image_list() if info['type'] == dataset.TEST_LABEL]  # 测试集
 
     # 加载模型
-    m = network.faster_rcnn(config, stage='test')
-    m.load_weights(config.rcnn_weights, by_name=True)
+    model = network.faster_rcnn(config, stage='test')
+    model.load_weights(config.rcnn_weights, by_name=True)
     # m.summary()
 
     # class map 转为 id map
@@ -42,7 +42,7 @@ def inference(output_dir):
                                              config.IMAGE_MAX_DIM,
                                              all_img_list[id]['boxes'])
         # 预测
-        boxes, scores, class_ids, class_logits = m.predict([np.expand_dims(image, axis=0), np.expand_dims(image_meta, axis=0)])
+        boxes, scores, class_ids, class_logits = model.predict([np.expand_dims(image, axis=0), np.expand_dims(image_meta, axis=0)])
 
         boxes = np_utils.remove_pad(boxes[0])
         scores = np_utils.remove_pad(scores[0])[:, 0]

@@ -1,18 +1,19 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
 """
-   File Name：     roi_align
-   Description :   RoiAlign层
-   Author :       mick.yi
-   date：          2019/2/1
+Roi投影到特征图
 """
+
 from keras import layers
 import tensorflow as tf
+
 
 class RoiAlign(layers.Layer):
     """
     将proposal边框投影到最后一层feature map上，并池化为7*7
     """
-
     def __init__(self, image_max_dim, pool_size=(7, 7), **kwargs):
         self.pool_size = pool_size
         self.image_max_dim = image_max_dim

@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on 2018/12/4 10:46
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
 
-@author: mick.yi
+"""
 损失函数层
 """
+
 import tensorflow as tf
 
 
