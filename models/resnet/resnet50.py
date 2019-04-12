@@ -3,12 +3,17 @@
 # Author:Speciallan
 
 """
-ResNet50
+ResNet实现
 """
 
 from keras import layers, Model, backend
 
 def resnet50(input):
+    """
+    ResNet50
+    :param input: 输入Keras.Input
+    :return:
+    """
 
     bn_axis = 3
 
