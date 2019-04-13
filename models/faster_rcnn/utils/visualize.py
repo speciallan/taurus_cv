@@ -3,7 +3,7 @@
 # Author:Speciallan
 
 """
-可视化
+可视化组件
 """
 
 import matplotlib.pyplot as plt
@@ -15,9 +15,7 @@ import numpy as np
 
 def random_colors(N, bright=True):
     """
-    生成随机颜色
-    To get visually distinct colors, generate them in HSV space then
-    convert to RGB.
+    生成HSV随机颜色并转换成RGB
     """
     brightness = 1.0 if bright else 0.7
     hsv = [(i / N, 1, brightness) for i in range(N)]
@@ -46,7 +44,7 @@ def display_instances(image, boxes, class_ids, class_names,
     # Number of instances
     N = boxes.shape[0]
     if not N:
-        print("\n*** No instances to display *** \n")
+        print("\n*** 此图没有实例展示 *** \n")
     else:
         assert boxes.shape[0] == class_ids.shape[0]
 
@@ -56,10 +54,10 @@ def display_instances(image, boxes, class_ids, class_names,
         _, ax = plt.subplots(1, figsize=figsize)
         auto_show = True
 
-    # Generate random colors
+    # 生成随机颜色
     colors = colors or random_colors(N)
 
-    # Show area outside image boundaries.
+    # 展示边界外的区域
     height, width = image.shape[:2]
     ax.set_ylim(height + 10, -10)
     ax.set_xlim(-10, width + 10)

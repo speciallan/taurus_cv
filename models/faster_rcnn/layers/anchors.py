@@ -15,7 +15,7 @@ class Anchor(keras.layers.Layer):
 
     def __init__(self, base_size, ratios, scales, strides, **kwargs):
         """
-        Anchor生成
+        Anchor生成层
         :param base_size: anchor的base_size,如：64
         :param ratios: 长宽比; 如 [1,1/2,2]
         :param scales: 缩放比: 如 [1,2,4]

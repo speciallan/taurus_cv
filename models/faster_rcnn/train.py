@@ -82,8 +82,11 @@ def train(args):
     # 训练rpn
     if 'rpn' in args.stages:
 
+        # 获取rpn网络和预训练权重
         model = network.rpn_net(config)
         model.load_weights(config.pretrained_weights, by_name=True)
+
+        # 编译模型
         loss_names = ["rpn_bbox_loss", "rpn_class_loss"]
         network.compile(model, config, loss_names)
 
@@ -118,11 +121,15 @@ def train(args):
         metric_names = ['rcnn_miss_match_gt_num']
         network.add_metrics(model, metric_names, layer.output[-1:])
 
-        # 加载预训练模型
+        # 加载frcnn预训练模型
         if args.init_epochs > 0:
             model.load_weights(args.init_weight_path, by_name=True)
-        elif os.path.exists(config.rpn_weights):  # 有rpn预训练模型就加载，没有直接加载resnet50预训练模型
+
+        # 有rpn预训练模型就加载，没有直接加载resnet50预训练模型
+        elif os.path.exists(config.rpn_weights):
             model.load_weights(config.rpn_weights, by_name=True)
+
+        # 加载CNN预训练模型
         else:
             model.load_weights(config.pretrained_weights, by_name=True)
 

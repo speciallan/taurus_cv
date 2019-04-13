@@ -1,6 +1,6 @@
 [faster_rcnn]
-rpn_weights = ./models/faster-rcnn-rpn.h5
-rcnn_weights = ./models/faster-rcnn-rcnn.h5
+rpn_weights = ./models/frcnn-rpn.h5
+rcnn_weights = ./models/frcnn-rcnn.h5
 voc_path = /home/speciallan/Documents/python/data/VOCdevkit
 log_path = ./logs
 

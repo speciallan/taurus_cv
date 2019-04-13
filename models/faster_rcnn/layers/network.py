@@ -12,8 +12,7 @@ from keras import layers, backend
 from keras.models import Model
 from keras.layers import Input, Lambda, Conv2D, Reshape, TimeDistributed
 
-from models.resnet.resnet import resnet50
-
+from .feature_extractor import feature_extractor
 from .anchors import Anchor
 from .target import RpnTarget, DetectTarget
 from .proposals import RpnToProposal
@@ -23,15 +22,6 @@ from .specific_to_agnostic import deal_delta
 from .detect_boxes import ProposalToDetectBox
 from .clip_boxes import ClipBoxes, UniqueClipBoxes
 
-def resnet_extractor(input):
-    """
-    ResNet特征提取器
-    :param input:
-    :return:
-    """
-
-    x = resnet50(input, is_extractor=True)
-    return x
 
 def rpn_net(config, stage='train'):
     """
@@ -43,13 +33,29 @@ def rpn_net(config, stage='train'):
 
     batch_size = config.IMAGES_PER_GPU
 
+    # 图片尺寸
     input_image = Input(batch_shape=(batch_size,) + config.IMAGE_INPUT_SHAPE)
+
+    # 二分类
     input_class_ids = Input(batch_shape=(batch_size, config.MAX_GT_INSTANCES, 1 + 1))
+
+    # 回归框4个坐标和边框总数N
     input_boxes = Input(batch_shape=(batch_size, config.MAX_GT_INSTANCES, 4 + 1))
+
+    """
+    input_image_meta包括以下，一共12个值
+    :param image_id:
+    :param original_image_shape: 原始图像形状，tuple(H,W,3)
+    :param image_shape: 缩放后图像形状tuple(H,W,3)
+    :param window: 原始图像在缩放图像上的窗口位置（y1,x1,y2,x2)
+    :param scale: 缩放因子
+    """
     input_image_meta = Input(batch_shape=(batch_size, 12))
 
     # 特征及预测结果
-    features = resnet_extractor(input_image)
+    features = feature_extractor(input_image)
+
+    # 通过rpn网络得到分类和回归值
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
 
     # 生成anchor
@@ -73,18 +79,26 @@ def rpn_net(config, stage='train'):
         cls_loss = Lambda(lambda x: rpn_cls_loss(*x), name='rpn_class_loss')([class_logits, cls_ids, anchor_indices])
         regress_loss = Lambda(lambda x: rpn_regress_loss(*x), name='rpn_bbox_loss')([boxes_regress, deltas, anchor_indices])
 
+        # 训练阶段，得到分类和回归损失
         return Model(inputs=[input_image, input_image_meta, input_class_ids, input_boxes], outputs=[cls_loss, regress_loss])
 
-    else:  # 测试阶段
-        # 应用分类和回归
+    else:
         detect_boxes, class_scores, _ = RpnToProposal(batch_size,
                                                       output_box_num=config.POST_NMS_ROIS_INFERENCE,
                                                       iou_threshold=config.RPN_NMS_THRESHOLD,
                                                       name='rpn2proposals')([boxes_regress, class_logits, anchors])
 
+        # 预测阶段，通过rpn获取候选框，得到候选框和置信度
         return Model(inputs=[input_image, input_image_meta], outputs=[detect_boxes, class_scores])
 
+
 def faster_rcnn(config, stage='train'):
+    """
+    Faster-rcnn网络
+    :param config:
+    :param stage:
+    :return:
+    """
 
     batch_size = config.IMAGES_PER_GPU
     # input_image = Input(batch_shape=(batch_size,)+image_shape)
@@ -98,7 +112,7 @@ def faster_rcnn(config, stage='train'):
     input_image_meta = Input(shape=(12,))
 
     # 通过CNN提取特征
-    features = resnet_extractor(input_image)
+    features = feature_extractor(input_image)
 
     # 训练rpn 得到回归和分类分
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
@@ -155,6 +169,7 @@ def faster_rcnn(config, stage='train'):
         regress_loss_rcnn = Lambda(lambda x: detect_regress_loss(*x), name='rcnn_bbox_loss')([rcnn_deltas, roi_deltas, roi_class_ids])
         cls_loss_rcnn = Lambda(lambda x: detect_cls_loss(*x), name='rcnn_class_loss')([rcnn_class_logits, roi_class_ids])
 
+        # 端到端训练，得到4类损失
         return Model(inputs=[input_image, input_image_meta, gt_class_ids, gt_boxes],
                      outputs=[cls_loss_rpn, regress_loss_rpn, regress_loss_rcnn, cls_loss_rcnn])
 
@@ -169,8 +184,8 @@ def faster_rcnn(config, stage='train'):
         detect_boxes, class_scores, detect_class_ids, detect_class_logits = ProposalToDetectBox(
             score_threshold=0.05,
             output_box_num=100,
-            name='proposals2detectboxes')(
-            [rcnn_deltas, rcnn_class_logits, proposal_boxes])
+            name='proposals2detectboxes'
+        )([rcnn_deltas, rcnn_class_logits, proposal_boxes])
 
         # 裁剪到窗口内部
         detect_boxes_coordinate, detect_boxes_tag = Lambda(lambda x: [x[..., :4], x[..., 4:]])(detect_boxes)
@@ -179,6 +194,7 @@ def faster_rcnn(config, stage='train'):
         # 最后再合并tag返回
         detect_boxes = Lambda(lambda x: tf.concat(x, axis=-1))([detect_boxes_coordinate, detect_boxes_tag])
 
+        # 预测阶段，得到检测框、置信度、分类id、分类预测概率
         return Model(inputs=[input_image, input_image_meta],
                      outputs=[detect_boxes, class_scores, detect_class_ids, detect_class_logits])
 
@@ -200,7 +216,7 @@ def compile(keras_model, config, loss_names=[]):
     keras_model._losses = []
     keras_model._per_input_losses = {}
 
-    # 添加损失到keras
+    # 层输出加上权重，添加损失到keras
     for name in loss_names:
         layer = keras_model.get_layer(name)
         if layer is None or layer.output in keras_model.losses:

@@ -13,7 +13,7 @@ from ..utils import tf_utils
 
 class ClipBoxes(keras.layers.Layer):
     """
-    裁剪
+    裁剪层
     """
     def __init__(self, **kwargs):
         super(ClipBoxes, self).__init__(**kwargs)

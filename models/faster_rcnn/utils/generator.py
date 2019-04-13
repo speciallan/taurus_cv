@@ -33,6 +33,7 @@ def image_generator(image_list, batch_size, max_output_dim, max_gt_num, stage='t
         batch_bbox = []
 
         for id in ids:
+            # 图像数据，图像元数据，回归框
             image, image_meta, bbox = image_util.load_image_gt(id,
                                                                image_list[id]['filepath'],
                                                                max_output_dim,

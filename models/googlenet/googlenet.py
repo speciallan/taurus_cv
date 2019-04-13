@@ -2,9 +2,14 @@
 # -*- coding:utf-8 -*-
 # Author:Speciallan
 
+"""
+GoogleNet实现，包括inception模块
+"""
+
 from keras import layers
 from keras.models import Model
 from functools import partial
+
 
 # 1*1卷积
 conv1x1 = partial(layers.Conv2D, kernel_size=1, activation='relu')

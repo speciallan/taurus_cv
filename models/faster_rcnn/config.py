@@ -110,8 +110,8 @@ class VocConfig(Config):
     IMAGES_PER_GPU = 1
     BATCH_SIZE = IMAGES_PER_GPU
 
-    # rcnn分类数
-    NUM_CLASSES = 1 + 20  # voc has 20 classes
+    # rcnn分类数, VOC包括20个分类
+    NUM_CLASSES = 1 + 20
     CLASS_MAPPING = {'bg': 0,
                      'train': 1,
                      'dog': 2,

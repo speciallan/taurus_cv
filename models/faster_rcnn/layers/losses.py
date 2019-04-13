@@ -3,7 +3,7 @@
 # Author:Speciallan
 
 """
-损失函数层
+损失函数
 """
 
 import tensorflow as tf

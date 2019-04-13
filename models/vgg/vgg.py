@@ -2,15 +2,24 @@
 # -*- coding:utf-8 -*-
 # Author:Speciallan
 
-from tensorflow.python.keras import layers
-from tensorflow.python.keras import Model
+"""
+VGG实现
+"""
+
+from keras import Model, layers
 from functools import partial
 
 # 卷积偏函数 3×3卷积核 步长1
 conv3 = partial(layers.Conv2D, kernel_size=3, strides=1, padding='same', activation='relu')
 
-# 卷积复用：张量、卷积核、卷积层数
 def block(in_tensor, filters, n_convs):
+    """
+    卷积复用：张量、卷积核、卷积层数
+    :param in_tensor:
+    :param filters:
+    :param n_convs:
+    :return:
+    """
 
     conv_block = in_tensor
 
@@ -19,8 +28,16 @@ def block(in_tensor, filters, n_convs):
 
     return conv_block
 
-# 16层
+
 def vgg(in_shape=(227,227,3), n_classes=1000, opt='sgd', n_stages_per_blocks=[2, 2, 3, 3, 3]):
+    """
+    VGG
+    :param in_shape:
+    :param n_classes:
+    :param opt:
+    :param n_stages_per_blocks:
+    :return:
+    """
 
     in_layer = layers.Input(in_shape)
 
@@ -59,13 +76,16 @@ def vgg(in_shape=(227,227,3), n_classes=1000, opt='sgd', n_stages_per_blocks=[2,
 
     return model
 
-# 16层
+
+# VGG16
 def vgg16(in_shape=(227,227,3), n_classes=1000, opt='sgd'):
     return vgg(in_shape, n_classes, opt)
 
-# 19层
+
+# VGG19
 def vgg19(in_shape=(227,227,3), n_classes=1000, opt='sgd'):
     return vgg(in_shape, n_classes, opt, [2, 2, 4, 4, 4])
+
 
 if __name__ == '__main__':
 
