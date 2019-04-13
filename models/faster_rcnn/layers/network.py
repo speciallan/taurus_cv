@@ -12,7 +12,7 @@ from keras import layers, backend
 from keras.models import Model
 from keras.layers import Input, Lambda, Conv2D, Reshape, TimeDistributed
 
-from models.resnet.resnet50 import resnet50
+from models.resnet.resnet import resnet50
 
 from .anchors import Anchor
 from .target import RpnTarget, DetectTarget
@@ -23,6 +23,15 @@ from .specific_to_agnostic import deal_delta
 from .detect_boxes import ProposalToDetectBox
 from .clip_boxes import ClipBoxes, UniqueClipBoxes
 
+def resnet_extractor(input):
+    """
+    ResNet特征提取器
+    :param input:
+    :return:
+    """
+
+    x = resnet50(input, is_extractor=True)
+    return x
 
 def rpn_net(config, stage='train'):
     """
@@ -40,7 +49,7 @@ def rpn_net(config, stage='train'):
     input_image_meta = Input(batch_shape=(batch_size, 12))
 
     # 特征及预测结果
-    features = resnet50(input_image)
+    features = resnet_extractor(input_image)
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
 
     # 生成anchor
@@ -89,7 +98,7 @@ def faster_rcnn(config, stage='train'):
     input_image_meta = Input(shape=(12,))
 
     # 通过CNN提取特征
-    features = resnet50(input_image)
+    features = resnet_extractor(input_image)
 
     # 训练rpn 得到回归和分类分
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)

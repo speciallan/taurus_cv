@@ -1,1 +1,1 @@
-python train.py --init_weight_path=./models/faster-rcnn-rcnn.h5 --init_epochs=10 --epochs=60
+python train.py --init_weight_path=./models/faster-rcnn-rcnn.h5 --init_epochs=10 --epochs=30
