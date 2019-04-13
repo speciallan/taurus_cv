@@ -13,11 +13,12 @@ import os
 matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
+
 from .io.input import get_prepared_detection_dataset
 from .config import current_config as config
 from .layers import network
 from .utils import visualize, np_utils
-from utils.image import load_image_gt
+from .preprocessing.image import load_image_gt
 
 
 def inference(output_dir):

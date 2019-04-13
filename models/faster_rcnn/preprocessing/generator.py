@@ -9,7 +9,7 @@
 import random
 import numpy as np
 from ..utils import np_utils
-from utils import image as image_util
+from ..preprocessing import image as image_util
 
 
 def image_generator(image_list, batch_size, max_output_dim, max_gt_num, stage='train'):

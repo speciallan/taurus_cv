@@ -73,6 +73,7 @@ def rpn_net(config, stage='train'):
         # 生成分类和回归目标
         rpn_targets = RpnTarget(batch_size, config.RPN_TRAIN_ANCHORS_PER_IMAGE, name='rpn_target')([input_boxes, input_class_ids, anchors])  # [deltas,cls_ids,indices,..]
 
+        # gt_boxs,gt_cls_ids,anchors
         deltas, cls_ids, anchor_indices = rpn_targets[:3]
 
         # 定义损失layer
@@ -101,10 +102,6 @@ def faster_rcnn(config, stage='train'):
     """
 
     batch_size = config.IMAGES_PER_GPU
-    # input_image = Input(batch_shape=(batch_size,)+image_shape)
-    # gt_class_ids = Input(batch_shape=(batch_size, max_gt_num, 1 + 1))
-    # gt_boxes = Input(batch_shape=(batch_size, max_gt_num, 4 + 1))
-    # input_image_meta = Input(batch_shape=(batch_size, 12))
 
     input_image = Input(shape=config.IMAGE_INPUT_SHAPE)
     gt_class_ids = Input(shape=(config.MAX_GT_INSTANCES, 1 + 1))
@@ -131,7 +128,7 @@ def faster_rcnn(config, stage='train'):
     # anchors = ClipBoxes()([anchors, windows])
 
     # 应用分类和回归生成proposal，通过NMS后保留2000个候选框
-    output_box_num = config.POST_NMS_ROIS_TRAINING if stage == 'train' else config.POST_NMS_ROIS_INFERENCE
+    output_box_num = config.POST_NMS_ROIS_TRAIN if stage == 'train' else config.POST_NMS_ROIS_INFERENCE
 
     # 通过rpn后的候选框和anchors计算iou淘汰一部分，再走NMS过滤，得到最后的候选框rois [proprosal_boxes,fg_scores,class_logits]
     proposal_boxes, _, _ = RpnToProposal(batch_size,
@@ -159,7 +156,8 @@ def faster_rcnn(config, stage='train'):
         cls_loss_rpn = Lambda(lambda x: rpn_cls_loss(*x), name='rpn_class_loss')([class_logits, rpn_cls_ids, anchor_indices])
         regress_loss_rpn = Lambda(lambda x: rpn_regress_loss(*x), name='rpn_bbox_loss')([boxes_regress, rpn_deltas, anchor_indices])
 
-        # 检测网络的分类和回归目标
+        # 检测网络的分类和回归目标，根据gt和iou淘汰一部分
+        # IoU>=0.5的为正样本；IoU<0.5的为负样本
         roi_deltas, roi_class_ids, train_rois, _ = DetectTarget(batch_size, config.TRAIN_ROIS_PER_IMAGE, config.ROI_POSITIVE_RATIO, name='rcnn_target')([gt_boxes, gt_class_ids, proposal_boxes])
 
         # 检测网络 RoiHead

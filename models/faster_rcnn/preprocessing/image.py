@@ -10,6 +10,7 @@ from skimage import io, transform
 from skimage.color import gray2rgb
 import numpy as np
 
+
 def load_image(image_path):
     """
     加载图像

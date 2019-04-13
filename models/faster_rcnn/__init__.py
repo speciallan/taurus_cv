@@ -5,4 +5,5 @@
 from . import io
 from . import layers
 from . import preprocessing
+from . import training
 from . import utils

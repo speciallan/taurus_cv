@@ -12,7 +12,6 @@ import os
 from pretrained_models.get import get as get_pretrained_model
 
 # Faster_rcnn 基础配置
-
 class Config(object):
 
     # 配置名称
@@ -53,7 +52,7 @@ class Config(object):
     RPN_TRAIN_ANCHORS_PER_IMAGE = 256
 
     # 训练和预测阶段NMS后保留的ROIs数
-    POST_NMS_ROIS_TRAINING = 2000
+    POST_NMS_ROIS_TRAIN = 2000
     POST_NMS_ROIS_INFERENCE = 1000
 
     # 检测网络训练rois数和正样本比

@@ -10,10 +10,9 @@ import argparse
 import sys
 import numpy as np
 
-from utils import image as image_utils
-
 from .io.input import get_prepared_detection_dataset
 from .config import current_config as config
+from .preprocessing import image as image_utils
 from .utils import np_utils, eval_utils
 from .layers import network
 
@@ -47,6 +46,7 @@ def evaluate(args, image_num=200):
     # 通过测试集验证模型
     # 内存不够，要使用生成器载入，一次100-200张
     for id in range(len(test_image_list)):
+
         image, image_meta, _ = image_utils.load_image_gt(id, test_image_list[id]['filepath'], config.IMAGE_MAX_DIM, test_image_list[id]['boxes'])
 
         # 预测结果，每次预测一张图

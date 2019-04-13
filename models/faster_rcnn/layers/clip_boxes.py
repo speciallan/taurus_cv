@@ -3,7 +3,7 @@
 # Author:Speciallan
 
 """
-边框裁剪层
+边框裁剪层，用对应候选框裁剪图片
 """
 
 import keras
