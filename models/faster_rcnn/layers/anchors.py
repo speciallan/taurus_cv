@@ -12,6 +12,9 @@ import numpy as np
 
 
 class Anchor(keras.layers.Layer):
+    """
+    Anchor生成类
+    """
 
     def __init__(self, base_size, ratios, scales, strides, **kwargs):
         """
