@@ -19,29 +19,32 @@ from .config import current_config as config
 from .layers import network
 from .utils import visualize, np_utils
 from .preprocessing.image import load_image_gt
+from .training import trainer
 
 
 def inference(output_dir):
 
-    # 加载数据
-    dataset = get_prepared_detection_dataset(config)
+    # 设置运行时环境 / training.trainer模块
+    trainer.set_runtime_environment()
 
-    # 获取所有测试集图片
-    all_img_list = [info for info in dataset.get_image_list() if info['type'] == dataset.TEST_LABEL]  # 测试集
+    # 加载数据
+    test_img_list = get_prepared_detection_dataset(config).get_test_data()
 
     # 加载模型
     model = network.faster_rcnn(config, stage='test')
     model.load_weights(config.rcnn_weights, by_name=True)
-    # m.summary()
+
+    # model.summary()
 
     # class map 转为 id map
     id_mapping = class_map_to_id_map(config.CLASS_MAPPING)
 
     def _show_inference(id, ax=None):
+
         image, image_meta, _ = load_image_gt(id,
-                                             all_img_list[id]['filepath'],
+                                             test_img_list[id]['filepath'],
                                              config.IMAGE_MAX_DIM,
-                                             all_img_list[id]['boxes'])
+                                             test_img_list[id]['boxes'])
         # 预测
         boxes, scores, class_ids, class_logits = model.predict([np.expand_dims(image, axis=0), np.expand_dims(image_meta, axis=0)])
 
@@ -58,8 +61,8 @@ def inference(output_dir):
         # 画框到原图
         visualize.display_instances(image, boxes, class_ids, id_mapping, scores=scores, ax=ax)
 
-    # 随机展示9张图像
-    image_ids = np.random.choice(len(all_img_list), 16, replace=False)
+    # 随机展示16张图像
+    image_ids = np.random.choice(len(test_img_list), 16, replace=False)
 
     # 画图并展示
     fig = plt.figure(figsize=(20, 20))
@@ -70,7 +73,7 @@ def inference(output_dir):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    fig.savefig(output_dir + '/inferece_examples.{}.png'.format(np.random.randint(10)))
+    fig.savefig(output_dir + '/inference_examples_{}.png'.format(np.random.randint(10)))
 
 
 def class_map_to_id_map(class_mapping):

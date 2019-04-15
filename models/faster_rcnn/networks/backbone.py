@@ -3,7 +3,7 @@
 # Author:Speciallan
 
 """
-特征提取器
+骨干网络用作特征提取器
 """
 
 from models.resnet.resnet import resnet50

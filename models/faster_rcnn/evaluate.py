@@ -15,14 +15,16 @@ from .config import current_config as config
 from .preprocessing import image as image_utils
 from .utils import np_utils, eval_utils
 from .layers import network
+from .training import trainer
 
 
 def evaluate(args, image_num=200):
 
-    # 加载数据集
-    dataset = get_prepared_detection_dataset(config)
+    # 设置运行时环境 / training.trainer模块
+    trainer.set_runtime_environment()
 
-    test_image_list = [info for info in dataset.get_image_list() if info['type'] == dataset.TEST_LABEL]
+    # 加载数据集
+    test_image_list = get_prepared_detection_dataset(config).get_test_data()
 
     print("测试集图片数量:{}".format(len(test_image_list)))
 
@@ -34,7 +36,8 @@ def evaluate(args, image_num=200):
     else:
         model.load_weights(config.rcnn_weights, by_name=True)
 
-    # m.summary()
+    # model.summary()
+
     # 预测边框、得分、类别
     predict_boxes = []
     predict_scores = []

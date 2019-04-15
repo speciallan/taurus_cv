@@ -23,11 +23,8 @@ def train(args):
     # 设置运行时环境 / training.trainer模块
     trainer.set_runtime_environment()
 
-    # 获取VOC原始数据集，并根据models/faster_rcnn/config中的分类关联数据，得到最后的训练测试集 / io模块
-    dataset = get_prepared_detection_dataset(config)
-
-    # 根据VOC数据集中的trainval属性筛选出训练集图片
-    train_img_list = [info for info in dataset.get_image_list() if info['type'] == dataset.TRAIN_LABEL]
+    # 获取VOC数据集中的训练集数据，并根据models/faster_rcnn/config中的分类关联数据，得到最后的训练测试集 / io模块
+    train_img_list = get_prepared_detection_dataset(config).get_train_data()
 
     print("训练集图片数量:{}".format(len(train_img_list)))
 
