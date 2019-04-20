@@ -16,5 +16,5 @@ if __name__ == '__main__':
     argments = parse.parse_args(sys.argv[1:])
 
     # 执行评估
-    evaluate(argments, image_num=200)
+    evaluate(argments, image_num=4000)
 

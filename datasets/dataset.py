@@ -9,6 +9,7 @@
 import numpy as np
 from .pascal_voc import get_voc_dataset
 
+
 class Dataset(object):
     """
     基础数据集
@@ -37,6 +38,19 @@ class Dataset(object):
         """
         raise NotImplementedError('请实现具体的数据准备方法')
 
+    def get_train_data(self):
+        """
+        获取训练集数据
+        :return:
+        """
+        raise NotImplementedError('请实现具体的训练集方法')
+
+    def get_test_data(self):
+        """
+        获取测试集数据
+        :return:
+        """
+        raise NotImplementedError('请实现具体的测试集方法')
 
 class VocDataset(Dataset):
 
@@ -98,3 +112,10 @@ class VocDetectionDataset(VocDataset):
 
         return self
 
+    def get_train_data(self):
+
+        return [info for info in self.get_image_list() if info['type'] == self.TRAIN_LABEL]
+
+    def get_test_data(self):
+
+        return [info for info in self.get_image_list() if info['type'] == self.TEST_LABEL]
