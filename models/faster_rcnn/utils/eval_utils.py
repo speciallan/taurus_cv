@@ -7,7 +7,7 @@
 """
 
 import numpy as np
-from ..utils import np_utils
+from taurus_cv.models.faster_rcnn.utils import np_utils
 
 
 def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0.05, max_boxes_num=100):

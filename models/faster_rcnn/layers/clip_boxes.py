@@ -8,7 +8,7 @@
 
 import keras
 import tensorflow as tf
-from ..utils import tf_utils
+from taurus_cv.models.faster_rcnn.utils import tf_utils
 
 
 class ClipBoxes(keras.layers.Layer):

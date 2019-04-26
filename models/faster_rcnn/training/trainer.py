@@ -11,7 +11,7 @@ import tensorflow as tf
 import keras
 from keras.callbacks import TensorBoard, ReduceLROnPlateau, ModelCheckpoint
 
-from ..config import current_config as config
+from taurus_cv.models.faster_rcnn.config import current_config as config
 
 
 def set_runtime_environment():

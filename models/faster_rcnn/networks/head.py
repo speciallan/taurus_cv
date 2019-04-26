@@ -9,7 +9,7 @@ RoiHead
 import tensorflow as tf
 from keras import backend
 from keras.layers import TimeDistributed, Conv2D, BatchNormalization, Activation, Lambda, Dense, Reshape
-from ..layers.roi_align import RoiAlign
+from taurus_cv.models.faster_rcnn.layers.roi_align import RoiAlign
 
 
 def roi_head(base_layers, rois, num_classes, image_max_dim, pool_size=(7, 7), fc_layers_size=1024):

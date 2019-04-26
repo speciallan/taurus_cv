@@ -6,7 +6,7 @@
 Faster-rcnn 输入数据准备
 """
 
-from datasets.dataset import VocDetectionDataset
+from taurus_cv.datasets.dataset import VocDetectionDataset
 
 def get_prepared_detection_dataset(config):
     """

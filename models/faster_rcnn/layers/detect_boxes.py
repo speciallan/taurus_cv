@@ -8,7 +8,7 @@
 
 import keras
 import tensorflow as tf
-from ..utils.tf_utils import apply_regress, pad_to_fixed_size
+from taurus_cv.models.faster_rcnn.utils.tf_utils import apply_regress, pad_to_fixed_size
 
 
 def detect_boxes(boxes, class_logits, max_output_size, iou_threshold=0.5, score_threshold=0.05, name=None):

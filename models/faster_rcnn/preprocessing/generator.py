@@ -8,8 +8,8 @@
 
 import random
 import numpy as np
-from ..utils import np_utils
-from ..preprocessing import image as image_util
+from taurus_cv.models.faster_rcnn.utils import np_utils
+from taurus_cv.models.faster_rcnn.preprocessing import image as image_util
 
 
 def image_generator(image_list, batch_size, max_output_dim, max_gt_num, stage='train'):

@@ -3,10 +3,10 @@
 # Author:Speciallan
 
 import sys
-sys.path.append('../..')
+sys.path.append('../../..')
 
-from models.faster_rcnn.inference import *
-from utils.spe import *
+from taurus_cv.models.faster_rcnn.inference import inference
+from taurus_cv.utils.spe import *
 
 if __name__ == '__main__':
 

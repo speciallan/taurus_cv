@@ -10,12 +10,12 @@ import argparse
 import sys
 import numpy as np
 
-from .io.input import get_prepared_detection_dataset
-from .config import current_config as config
-from .preprocessing import image as image_utils
-from .utils import np_utils, eval_utils
-from .layers import network
-from .training import trainer
+from taurus_cv.models.faster_rcnn.io.input import get_prepared_detection_dataset
+from taurus_cv.models.faster_rcnn.config import current_config as config
+from taurus_cv.models.faster_rcnn.preprocessing import image as image_utils
+from taurus_cv.models.faster_rcnn.utils import np_utils, eval_utils
+from taurus_cv.models.faster_rcnn.layers import network
+from taurus_cv.models.faster_rcnn.training import trainer
 
 
 def evaluate(args, image_num=200):

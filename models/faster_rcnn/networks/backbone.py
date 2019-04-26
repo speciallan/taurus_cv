@@ -6,7 +6,7 @@
 骨干网络用作特征提取器
 """
 
-from models.resnet.resnet import resnet50
+from taurus_cv.models.resnet.resnet import resnet50
 
 
 def feature_extractor(input):

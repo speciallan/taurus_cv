@@ -11,16 +11,16 @@ import keras
 from keras.models import Model
 from keras.layers import Input, Lambda
 
-from ..networks.backbone import feature_extractor
-from ..networks.rpn import rpn
-from ..networks.head import roi_head
-from .anchors import Anchor
-from .target import RpnTarget, DetectTarget
-from .proposals import RpnToProposal
-from .losses import rpn_cls_loss, rpn_regress_loss, detect_regress_loss, detect_cls_loss
-from .specific_to_agnostic import deal_delta
-from .detect_boxes import ProposalToDetectBox
-from .clip_boxes import ClipBoxes, UniqueClipBoxes
+from taurus_cv.models.faster_rcnn.networks.backbone import feature_extractor
+from taurus_cv.models.faster_rcnn.networks.rpn_net import rpn
+from taurus_cv.models.faster_rcnn.networks.head import roi_head
+from taurus_cv.models.faster_rcnn.layers.anchors import Anchor
+from taurus_cv.models.faster_rcnn.layers.target import RpnTarget, DetectTarget
+from taurus_cv.models.faster_rcnn.layers.proposals import RpnToProposal
+from taurus_cv.models.faster_rcnn.layers.losses import rpn_cls_loss, rpn_regress_loss, detect_regress_loss, detect_cls_loss
+from taurus_cv.models.faster_rcnn.layers.specific_to_agnostic import deal_delta
+from taurus_cv.models.faster_rcnn.layers.detect_boxes import ProposalToDetectBox
+from taurus_cv.models.faster_rcnn.layers.clip_boxes import ClipBoxes, UniqueClipBoxes
 
 
 def rpn_net(config, stage='train'):

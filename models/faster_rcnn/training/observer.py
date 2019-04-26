@@ -6,7 +6,7 @@
 训练观测值
 """
 
-from ..layers import network
+from taurus_cv.models.faster_rcnn.layers import network
 
 
 def add_rpn_observer(model):

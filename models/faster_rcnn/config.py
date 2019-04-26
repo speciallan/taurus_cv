@@ -9,7 +9,7 @@
 import numpy as np
 import configparser
 import os
-from pretrained_models.get import get as get_pretrained_model
+from taurus_cv.pretrained_models.get import get as get_pretrained_model
 
 # Faster_rcnn 基础配置
 class Config(object):
@@ -29,8 +29,10 @@ class Config(object):
     # CNN的架构
     BACKBONE = 'resnet50'
 
+    # 用于空洞卷积（目前没用）
     BACKBONE_STRIDES = [4, 8, 16, 32, 64]
 
+    # 用于FPN（目前没用）
     FPN_CLF_FC_SIZE = 1024
 
     # RPN分类数量（前景）

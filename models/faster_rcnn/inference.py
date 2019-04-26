@@ -14,12 +14,12 @@ matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 
-from .io.input import get_prepared_detection_dataset
-from .config import current_config as config
-from .layers import network
-from .utils import visualize, np_utils
-from .preprocessing.image import load_image_gt
-from .training import trainer
+from taurus_cv.models.faster_rcnn.io.input import get_prepared_detection_dataset
+from taurus_cv.models.faster_rcnn.config import current_config as config
+from taurus_cv.models.faster_rcnn.layers import network
+from taurus_cv.models.faster_rcnn.utils import visualize, np_utils
+from taurus_cv.models.faster_rcnn.preprocessing.image import load_image_gt
+from taurus_cv.models.faster_rcnn.training import trainer
 
 
 def inference(output_dir):
