@@ -199,6 +199,8 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False):
     # 完整CNN模型
     else:
 
+        x = layers.MaxPooling2D(pool_size=(2, 2))(x)
+        x = layers.Flatten()(x)
         dropout = layers.Dropout(0.5)(x)
         preds = layers.Dense(classes_num, activation='softmax')(dropout)
 

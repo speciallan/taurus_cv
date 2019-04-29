@@ -7,13 +7,12 @@
 """
 
 from taurus_cv.models.faster_rcnn.io.input import get_prepared_detection_dataset
-from taurus_cv.models.faster_rcnn.config import current_config as config
 from taurus_cv.models.faster_rcnn.preprocessing.generator import image_generator
 from taurus_cv.models.faster_rcnn.layers import network
 from taurus_cv.models.faster_rcnn.training import trainer, saver, observer
 
 
-def train(args):
+def train(args, config):
     """
     主训练程序
     :param args: 比如通过命令python train.py --stage=rpn --epochs=90 获取的参数值

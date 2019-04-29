@@ -11,14 +11,14 @@ import sys
 import numpy as np
 
 from taurus_cv.models.faster_rcnn.io.input import get_prepared_detection_dataset
-from taurus_cv.models.faster_rcnn.config import current_config as config
 from taurus_cv.models.faster_rcnn.preprocessing import image as image_utils
 from taurus_cv.models.faster_rcnn.utils import np_utils, eval_utils
 from taurus_cv.models.faster_rcnn.layers import network
 from taurus_cv.models.faster_rcnn.training import trainer
+from taurus_cv.utils.spe import spe
 
 
-def evaluate(args, image_num=200):
+def evaluate(args, config, image_num=200):
 
     # 设置运行时环境 / training.trainer模块
     trainer.set_runtime_environment()

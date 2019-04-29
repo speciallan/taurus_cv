@@ -6,6 +6,7 @@ import sys
 sys.path.append('../../..')
 
 from taurus_cv.models.faster_rcnn.evaluate import *
+from taurus_cv.models.faster_rcnn.config import current_config as config
 from taurus_cv.utils.spe import *
 
 if __name__ == '__main__':
@@ -16,5 +17,5 @@ if __name__ == '__main__':
     argments = parse.parse_args(sys.argv[1:])
 
     # 执行评估
-    evaluate(argments, image_num=4000)
+    evaluate(argments, config, image_num=4000)
 
