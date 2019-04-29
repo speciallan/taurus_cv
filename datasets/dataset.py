@@ -54,10 +54,11 @@ class Dataset(object):
 
 class VocDataset(Dataset):
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, sub_dir, **kwargs):
         """
         VOC数据集初始化
         :param path: 数据集路径，对于不同的数据集增加了path属性
+        :param sub_dir:
         :param kwargs:
         """
 
@@ -66,6 +67,7 @@ class VocDataset(Dataset):
         self.TEST_LABEL  = 'test'
 
         self.path = path
+        self.sub_dir = sub_dir
 
         super(VocDataset, self).__init__(**kwargs)
 
@@ -83,12 +85,12 @@ class VocDetectionDataset(VocDataset):
     VOC目标检测数据准备
     """
 
-    def __init__(self, path, **kwargs):
-        super(VocDetectionDataset, self).__init__(path, **kwargs)
+    def __init__(self, path, sub_dir, **kwargs):
+        super(VocDetectionDataset, self).__init__(path, sub_dir, **kwargs)
 
     def prepare(self):
 
-        img_info_list, classes_count, class_mapping = get_voc_dataset(self.path, self.class_mapping)
+        img_info_list, classes_count, class_mapping = get_voc_dataset(self.path, self.sub_dir, self.class_mapping)
 
         for img_info in img_info_list:
 

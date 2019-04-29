@@ -15,4 +15,4 @@ def get_prepared_detection_dataset(config):
     :return:
     """
 
-    return VocDetectionDataset(config.voc_path, class_mapping=config.CLASS_MAPPING).prepare()
+    return VocDetectionDataset(config.voc_path, config.voc_sub_dir, class_mapping=config.CLASS_MAPPING).prepare()

@@ -9,7 +9,7 @@
 import os
 import xml.etree.cElementTree as ET
 
-def get_voc_dataset(input_path, class_mapping):
+def get_voc_dataset(input_path, sub_dir='VOC2007', class_mapping=[]):
     """
     获取VOC数据
     :param input_path: voc数据集路径
@@ -22,7 +22,8 @@ def get_voc_dataset(input_path, class_mapping):
     classes_count = {}
 
     # VOC数据集根目录，包括2007、2012
-    data_paths = [os.path.join(input_path, s) for s in ['VOC2007']]
+    # data_paths = [os.path.join(input_path, s) for s in ['VOC2007']]
+    data_paths = [os.path.join(input_path, sub_dir)]
 
     print('正在解析标记文件')
 

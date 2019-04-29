@@ -142,6 +142,7 @@ class VocConfig(Config):
     rpn_weights = '/tmp/faster-rcnn-rpn.h5'
     rcnn_weights = '/tmp/faster-rcnn-rcnn.h5'
     voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
+    voc_sub_dir = 'VOC2007'
     log_path = './logs'
 
     if not os.path.exists(config_filepath):
@@ -180,4 +181,3 @@ for k,section in enumerate(sections):
     user_config = cf.items(section)
     for k2,v in enumerate(user_config):
         current_config.__setattr__(v[0], v[1])
-

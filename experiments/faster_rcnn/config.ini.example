@@ -2,6 +2,7 @@
 rpn_weights = ./models/frcnn-rpn.h5
 rcnn_weights = ./models/frcnn-rcnn.h5
 voc_path = /home/speciallan/Documents/python/data/VOCdevkit
+voc_sub_dir = VOC2007
 log_path = ./logs
 
 [system]

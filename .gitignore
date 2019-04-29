@@ -3,3 +3,4 @@ model/faster_rcnn/__pycache__
 *.pyc
 
 *.ini
+*.swp
