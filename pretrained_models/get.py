@@ -12,11 +12,14 @@ class PretrainedModels:
     pass
 
 # 获取方法
-def get(network='resnet50', weight='imagenet'):
+def get(weight_path, network='resnet50'):
 
     filepath = './'
 
-    if network == 'resnet50':
+    if weight_path and os.path.exists(weight_path):
+        return weight_path
+
+    elif network == 'resnet50':
         filename = '/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
         filepath = os.path.dirname(os.path.abspath(__file__)) + filename
 

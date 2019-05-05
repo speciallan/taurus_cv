@@ -136,7 +136,8 @@ class VocConfig(Config):
                      'aeroplane': 20
                      }
 
-    pretrained_weights = get_pretrained_model(network=Config.BACKBONE, weight='imagenet')
+    backbone_weight_path = ''
+    pretrained_weights = get_pretrained_model(weight_path=backbone_weight_path, network=Config.BACKBONE)
 
     config_filepath = './config.ini'
     rpn_weights = '/tmp/faster-rcnn-rpn.h5'
