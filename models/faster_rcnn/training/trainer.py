@@ -27,7 +27,7 @@ def set_runtime_environment():
     # keras.backend.set_floatx('float16')  # 设置字符精度，默认float32，使用float16会提高训练效率，但是可能导致精度不够，梯度出现问题。
 
 
-def get_call_back(stage):
+def get_callback(stage):
     """
     定义callback，用于每个epoch回调
     包括模型检查点ModelCheckpoint,学习率自减少ReduceLROnPlateau,训练过程可视化TensorBoard，他们都继承自Callback
@@ -78,7 +78,7 @@ def train_rpn(model, generator, epochs, iterations, init_epochs):
                         steps_per_epoch=iterations,
                         verbose=1,
                         initial_epoch=init_epochs,
-                        callbacks=get_call_back('rpn'))
+                        callbacks=get_callback('rpn'))
 
     return model
 
@@ -113,6 +113,6 @@ def train_rcnn(model, generator, epochs, iterations, init_epochs, init_weight_pa
                         steps_per_epoch=iterations,
                         verbose=1,
                         initial_epoch=init_epochs,
-                        callbacks=get_call_back('rcnn'))
+                        callbacks=get_callback('rcnn'))
 
     return model

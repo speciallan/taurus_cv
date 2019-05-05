@@ -1,0 +1,8 @@
+{
+    "pai.job.upload.enabled": true,
+    "pai.job.upload.exclude": [],
+    "pai.job.upload.include": [
+        "**/*.py"
+    ],
+    "pai.job.generateJobName.enabled": true
+}

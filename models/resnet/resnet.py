@@ -136,7 +136,7 @@ def resnet34(input, classes_num=1000, is_extractor=False):
 
         return Model(input, preds, name='resnet34')
 
-def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False):
+def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_transfer_learning=False):
     """
     ResNet50
     :param input: 输入Keras.Input
@@ -154,9 +154,10 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False):
     x = layers.BatchNormalization(axis=bn_axis, name='bn_conv1')(x)
     x = layers.Activation('relu')(x)
 
-    # conv2 [64,64,256]*3
+    # 池化
     x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
 
+    # conv2 [64,64,256]*3
     x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
@@ -196,13 +197,30 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False):
 
         return x
 
+    elif is_transfer_learning:
+
+        x = layers.AveragePooling2D()(x)
+        x = layers.Flatten()(x)
+
+        preds = layers.Dense(units=classes_num, activation='softmax', kernel_initializer='he_normal')(x)
+
+        model = Model(input, preds, name='resnet50')
+
+        # 3 4 6 3=16 * 3 前2个block 21层冻结
+        for layer in model.layers[:21]:
+            layer.trainable = False
+
+        return model
+
+
     # 完整CNN模型
     else:
 
-        x = layers.MaxPooling2D(pool_size=(2, 2))(x)
+        # x = layers.MaxPooling2D(pool_size=(7, 7))(x)
+        x = layers.AveragePooling2D()(x)
         x = layers.Flatten()(x)
-        dropout = layers.Dropout(0.5)(x)
-        preds = layers.Dense(classes_num, activation='softmax')(dropout)
+
+        preds = layers.Dense(units=classes_num, activation='softmax', kernel_initializer='he_normal')(x)
 
         return Model(input, preds, name='resnet50')
 
