@@ -56,7 +56,8 @@ def train(args, config):
                           generator=generator,
                           iterations=len(train_img_list) // config.BATCH_SIZE,
                           epochs=args.epochs,
-                          init_epochs=args.init_epochs)
+                          init_epochs=args.init_epochs,
+                          config=config)
 
         # 保存模型
         saver.save_model(model=model, weight_path=config.rpn_weights)
@@ -85,7 +86,8 @@ def train(args, config):
                            iterations=len(train_img_list) // config.BATCH_SIZE,
                            epochs=args.epochs,
                            init_epochs=args.init_epochs,
-                           init_weight_path=args.init_weight_path)
+                           init_weight_path=args.init_weight_path,
+                           config=config)
 
         # 保存模型
         if args.weight_path is not None:

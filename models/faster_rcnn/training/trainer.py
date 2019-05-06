@@ -11,9 +11,6 @@ import tensorflow as tf
 import keras
 from keras.callbacks import TensorBoard, ReduceLROnPlateau, ModelCheckpoint
 
-from taurus_cv.models.faster_rcnn.config import current_config as config
-
-
 def set_runtime_environment():
     """
     GPU设置，设置后端，包括字符精度
@@ -27,7 +24,7 @@ def set_runtime_environment():
     # keras.backend.set_floatx('float16')  # 设置字符精度，默认float32，使用float16会提高训练效率，但是可能导致精度不够，梯度出现问题。
 
 
-def get_callback(stage):
+def get_callback(stage, config):
     """
     定义callback，用于每个epoch回调
     包括模型检查点ModelCheckpoint,学习率自减少ReduceLROnPlateau,训练过程可视化TensorBoard，他们都继承自Callback
@@ -58,7 +55,7 @@ def get_callback(stage):
     return [checkpoint, lr_reducer, logs]          # 继承自Callback的类都能保存成list返回
 
 
-def train_rpn(model, generator, epochs, iterations, init_epochs):
+def train_rpn(model, generator, epochs, iterations, init_epochs, config):
     """
     训练rpn
     :param model:
@@ -78,12 +75,12 @@ def train_rpn(model, generator, epochs, iterations, init_epochs):
                         steps_per_epoch=iterations,
                         verbose=1,
                         initial_epoch=init_epochs,
-                        callbacks=get_callback('rpn'))
+                        callbacks=get_callback('rpn', config=config))
 
     return model
 
 
-def train_rcnn(model, generator, epochs, iterations, init_epochs, init_weight_path):
+def train_rcnn(model, generator, epochs, iterations, init_epochs, init_weight_path, config):
     """
     训练rcnn(rpn+roiHead)
     :param model:
@@ -103,7 +100,7 @@ def train_rcnn(model, generator, epochs, iterations, init_epochs, init_weight_pa
     elif os.path.exists(config.rpn_weights):
         model.load_weights(config.rpn_weights, by_name=True)
 
-    # 加载resnet预训练模型
+    # 加载resnet预训练模型 或者自己的分类器权重
     else:
         model.load_weights(config.pretrained_weights, by_name=True)
 
@@ -113,6 +110,6 @@ def train_rcnn(model, generator, epochs, iterations, init_epochs, init_weight_pa
                         steps_per_epoch=iterations,
                         verbose=1,
                         initial_epoch=init_epochs,
-                        callbacks=get_callback('rcnn'))
+                        callbacks=get_callback('rcnn', config=config))
 
     return model
