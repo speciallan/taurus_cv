@@ -24,21 +24,25 @@ def rpn_cls_loss(predict_cls_ids, true_cls_ids, indices):
     train_indices = tf.where(tf.not_equal(indices[:, :, -1], 0))  # 0为padding
     train_anchor_indices = tf.gather_nd(indices[..., 0], train_indices)  # 一维(batch*train_num,)，每个训练anchor的索引
     true_cls_ids = tf.gather_nd(true_cls_ids[..., 0], train_indices)  # 一维(batch*train_num,)
+
     # 转为onehot编码
     true_cls_ids = tf.where(true_cls_ids >= 1,
                             tf.ones_like(true_cls_ids, dtype=tf.uint8),
                             tf.zeros_like(true_cls_ids, dtype=tf.uint8))  # 前景类都为1
     true_cls_ids = tf.one_hot(true_cls_ids, depth=2)
+
     # batch索引
     batch_indices = train_indices[:, 0]  # 训练的第一维是batch索引
+
     # 每个训练anchor的2维索引
     train_indices_2d = tf.stack([batch_indices, tf.cast(train_anchor_indices, dtype=tf.int64)], axis=1)
+
     # 获取预测的anchors类别
     predict_cls_ids = tf.gather_nd(predict_cls_ids, train_indices_2d)  # (batch*train_num,2)
 
     # 交叉熵损失函数
-    losses = tf.nn.softmax_cross_entropy_with_logits_v2(
-        labels=true_cls_ids, logits=predict_cls_ids)
+    losses = tf.nn.softmax_cross_entropy_with_logits_v2(labels=true_cls_ids, logits=predict_cls_ids)
+
     return losses
 
 
