@@ -75,6 +75,57 @@ def inference(config, output_dir):
     fig.savefig(output_dir + '/inference_examples_{}.png'.format(np.random.randint(10)))
 
 
+def inference_rpn(config, output_dir):
+
+    # 设置运行时环境 / training.trainer模块
+    trainer.set_runtime_environment()
+
+    # 加载数据
+    test_img_list = get_prepared_detection_dataset(config).get_test_data()
+
+    # 加载模型
+    model = network.rpn_net(config, stage='test')
+    model.load_weights(config.rpn_weights, by_name=True)
+
+    # class map 转为 id map
+    id_mapping = class_map_to_id_map(config.CLASS_MAPPING)
+
+    def _show_inference(id, ax=None):
+
+        image, image_meta, _ = load_image_gt(id,
+                                             test_img_list[id]['filepath'],
+                                             config.IMAGE_MAX_DIM,
+                                             test_img_list[id]['boxes'])
+        # 预测
+        X_test = [np.expand_dims(image, axis=0), np.expand_dims(image_meta, axis=0)]
+
+        detect_boxes, class_scores = model.predict(X_test)
+
+        rois_boxes = detect_boxes[0][:20][:, :4] # 取4个坐标
+        rois_scores = class_scores[0][:20][:, :1] # 取前景分
+        class_ids = np.ones(rois_boxes.shape[0]).astype('int') # 整数用于mapping字典
+        print(rois_boxes.shape)
+
+        # print(rois_boxes, '\n', rois_scores)
+        id_mapping = {0:'bg', 1:'object'}
+
+        # 画框到原图
+        visualize.display_instances(image, rois_boxes, class_ids, id_mapping, scores=rois_scores, ax=ax)
+
+    # 随机展示16张图像
+    image_ids = np.random.choice(len(test_img_list), 1, replace=False)
+
+    # 画图并展示
+    fig = plt.figure(figsize=(20, 20))
+    for idx, image_id in enumerate(image_ids):
+        ax = fig.add_subplot(1, 1, idx + 1)
+        _show_inference(image_id, ax)
+
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    fig.savefig(output_dir + '/inference_rpn_examples_{}.png'.format(np.random.randint(10)))
+
 def class_map_to_id_map(class_mapping):
 
     id_map = {}

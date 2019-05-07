@@ -86,6 +86,10 @@ def display_instances(image, boxes, class_ids, class_names,
             class_id = class_ids[i]
             score = scores[i] if scores is not None else None
             label = class_names[class_id]
+
+            if isinstance(score, np.ndarray):
+                score = score[0]
+
             caption = "{} {:.3f}".format(label, score) if score else label
         else:
             caption = captions[i]
