@@ -18,3 +18,4 @@ def feature_extractor(input):
     """
     x = resnet50(input, layer_num=40, is_extractor=True)
     return x
+

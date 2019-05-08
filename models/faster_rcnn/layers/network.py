@@ -21,6 +21,7 @@ from taurus_cv.models.faster_rcnn.layers.losses import rpn_cls_loss, rpn_regress
 from taurus_cv.models.faster_rcnn.layers.specific_to_agnostic import deal_delta
 from taurus_cv.models.faster_rcnn.layers.detect_boxes import ProposalToDetectBox
 from taurus_cv.models.faster_rcnn.layers.clip_boxes import ClipBoxes, UniqueClipBoxes
+from taurus_cv.utils.spe import spe
 
 
 def rpn_net(config, stage='train'):
@@ -52,26 +53,28 @@ def rpn_net(config, stage='train'):
     """
     input_image_meta = Input(batch_shape=(batch_size, 12))
 
-    # 特征及预测结果
+    # 特征及预测结果 (1,32,32,1024)
     features = feature_extractor(input_image)
 
     # 定义rpn网络 得到分类和回归值
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
 
-    # 生成anchor
+    # 生成anchor (1,6144,4) 1是batch_size, 6144是anchors数量
+    # 占满了（512，512）
     anchors = Anchor(config.RPN_ANCHOR_BASE_SIZE,
                      config.RPN_ANCHOR_RATIOS,
                      config.RPN_ANCHOR_SCALES,
                      config.BACKBONE_STRIDE, name='gen_anchors')(features)
 
-    # 裁剪到窗口内
+    # 裁剪到窗口内 得到512x512内的anchors
     anchors = UniqueClipBoxes(config.IMAGE_INPUT_SHAPE, name='clip_anchors')(anchors)
+
     # windows = Lambda(lambda x: x[:, 7:11])(input_image_meta)
     # anchors = ClipBoxes()([anchors, windows])
 
     if stage == 'train':
 
-        # 生成分类和回归目标
+        # 生成分类和回归目标 deltas为处理后的box
         rpn_targets = RpnTarget(batch_size, config.RPN_TRAIN_ANCHORS_PER_IMAGE, name='rpn_target')([input_boxes, input_class_ids, anchors])  # [deltas,cls_ids,indices,..]
 
         # gt_boxs,gt_cls_ids,anchors
@@ -86,6 +89,8 @@ def rpn_net(config, stage='train'):
 
     else:
 
+        # 得到rpn出来的box和anchors求iou和nms排除后的box
+        # (1,?,5) (1,?,2)
         detect_boxes, class_scores, _ = RpnToProposal(batch_size,
                                                       output_box_num=config.POST_NMS_ROIS_INFERENCE,
                                                       iou_threshold=config.RPN_NMS_THRESHOLD,
@@ -194,6 +199,11 @@ def faster_rcnn(config, stage='train'):
 
         # 最后再合并tag返回
         detect_boxes = Lambda(lambda x: tf.concat(x, axis=-1))([detect_boxes_coordinate, detect_boxes_tag])
+
+        # detect_boxes (?,?,5) boxes_regress(?,?,4) proposal_boxes(1,?,5)
+        # detect_boxes = boxes_regress[:,:,:4]
+        # detect_boxes = proposal_boxes
+        # spe(detect_boxes, boxes_regress, proposal_boxes)
 
         # 预测阶段，得到检测框、置信度、分类id、分类预测概率
         return Model(inputs=[input_image, input_image_meta],

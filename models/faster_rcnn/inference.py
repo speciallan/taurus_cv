@@ -57,6 +57,10 @@ def inference(config, output_dir):
         # boxes = np.delete(boxes, right_idx, axis=0)
         # class_ids = np.delete(class_ids, right_idx, axis=0)
 
+        # 打印box score class_id数据
+        # print(boxes.shape, scores.shape, class_ids.shape)
+        # print(boxes, scores, class_ids)
+
         # 画框到原图
         visualize.display_instances(image, boxes, class_ids, id_mapping, scores=scores, ax=ax)
 
@@ -72,7 +76,9 @@ def inference(config, output_dir):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    fig.savefig(output_dir + '/inference_examples_{}.png'.format(np.random.randint(10)))
+    save_img_filename = output_dir + '/inference_examples_{}.png'.format(np.random.randint(10))
+    fig.savefig(save_img_filename)
+    print('可视化到:{}'.format(save_img_filename))
 
 
 def inference_rpn(config, output_dir):
@@ -124,7 +130,9 @@ def inference_rpn(config, output_dir):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    fig.savefig(output_dir + '/inference_rpn_examples_{}.png'.format(np.random.randint(10)))
+    save_img_filename = output_dir + '/inference_rpn_examples_{}.png'.format(np.random.randint(10))
+    fig.savefig(save_img_filename)
+    print('可视化到:{}'.format(save_img_filename))
 
 def class_map_to_id_map(class_mapping):
 

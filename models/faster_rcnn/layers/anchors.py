@@ -10,6 +10,8 @@ import tensorflow as tf
 import keras
 import numpy as np
 
+from taurus_cv.utils.spe import spe
+
 
 class Anchor(keras.layers.Layer):
     """
@@ -49,6 +51,12 @@ class Anchor(keras.layers.Layer):
 
         # 根据feature_map生成初始anchors(9,4)
         base_anchors = generate_anchors(self.base_size, self.ratios, self.scales)
+
+        # spe(base_anchors)
+        # import math
+        # for k,v in enumerate(base_anchors):
+        #     print(math.sqrt((v[2]-v[0])*(v[3]-v[1])))
+        # exit()
 
         # 得到(M*N,9,4)的anchors
         anchors = shift(features_shape[1:3], self.strides, base_anchors)
@@ -102,6 +110,8 @@ def shift(shape, strides, base_anchors):
     """
     H, W = shape[0], shape[1]
     print("shape:{}".format(shape))
+
+    # 滑动窗口 平移坐标
     ctr_x = (tf.cast(tf.range(W), tf.float32) + tf.constant(0.5, dtype=tf.float32)) * strides
     ctr_y = (tf.cast(tf.range(H), tf.float32) + tf.constant(0.5, dtype=tf.float32)) * strides
 

@@ -4,3 +4,4 @@ model/faster_rcnn/__pycache__
 
 *.ini
 *.swp
+experiments/faster_rcnn/predicted_images

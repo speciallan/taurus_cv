@@ -8,7 +8,8 @@
 
 import keras
 import tensorflow as tf
-from ..utils import tf_utils
+from taurus_cv.models.faster_rcnn.utils import tf_utils
+from taurus_cv.utils.spe import spe
 
 
 def compute_iou(gt_boxes, anchors):
@@ -104,8 +105,10 @@ def rpn_targets_graph(gt_boxes, gt_cls, anchors, rpn_train_anchors=None):
 
     # 每个anchors最大iou ，且iou>0.7的为正样本
     anchors_iou_max = tf.reduce_max(iou, axis=0)
+
     # 正样本索引号（iou>0.7),
     positive_anchor_indices_2 = tf.where(anchors_iou_max > 0.7, name='rpn_target_positive_indices')  # [:, 0]
+
     # 找到正样本对应的GT boxes 索引
     anchors_iou_argmax = tf.argmax(iou, axis=0)  # 每个anchor最大iou对应的GT 索引 [n]
     positive_gt_indices_2 = tf.gather_nd(anchors_iou_argmax, positive_anchor_indices_2)
@@ -122,10 +125,12 @@ def rpn_targets_graph(gt_boxes, gt_cls, anchors, rpn_train_anchors=None):
         [positive_anchor_indices, positive_gt_indices],
         tf.shape(positive_anchor_indices)[0],
         positive_num)
+
     # 根据索引选择anchor和GT
     positive_anchors = tf.gather(anchors, positive_anchor_indices)
     positive_gt_boxes = tf.gather(gt_boxes, positive_gt_indices)
     positive_gt_cls = tf.gather(gt_cls, positive_gt_indices)
+
     # 回归目标计算
     deltas = regress_target(positive_anchors, positive_gt_boxes)
 
