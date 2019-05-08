@@ -162,9 +162,6 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_trans
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
 
-    # 确定fine-turning层
-    no_train_model = Model(inputs=input, outputs=x)
-
     # conv3 [128,128,512]*4
     x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')
@@ -185,15 +182,20 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_trans
         x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
         x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
 
+    # 确定fine-turning层
+    no_train_model = Model(inputs=input, outputs=x)
+
     # 用作特征提取器做迁移学习
     if is_extractor:
 
         # 冻结参数，停止学习
         for l in no_train_model.layers:
-            if isinstance(l, layers.BatchNormalization):
-                l.trainable = True
-            else:
-                l.trainable = False
+            l.trainable = False
+
+            # if isinstance(l, layers.BatchNormalization):
+            #     l.trainable = True
+            # else:
+            #     l.trainable = False
 
         return x
 
