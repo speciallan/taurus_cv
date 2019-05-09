@@ -24,7 +24,7 @@ from taurus_cv.models.faster_rcnn.layers.clip_boxes import ClipBoxes, UniqueClip
 from taurus_cv.utils.spe import spe
 
 
-def rpn_net(config, stage='train'):
+def rpn_net(config, stage='train', backbone=None):
     """
     单独训练rpn
     :param config:
@@ -54,7 +54,7 @@ def rpn_net(config, stage='train'):
     input_image_meta = Input(batch_shape=(batch_size, 12))
 
     # 特征及预测结果 (1,32,32,1024)
-    features = feature_extractor(input_image)
+    features = feature_extractor(input_image, model=backbone)
 
     # 定义rpn网络 得到分类和回归值
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
@@ -100,7 +100,7 @@ def rpn_net(config, stage='train'):
         return Model(inputs=[input_image, input_image_meta], outputs=[detect_boxes, class_scores])
 
 
-def faster_rcnn(config, stage='train'):
+def faster_rcnn(config, stage='train', backbone=None):
     """
     Faster-rcnn网络
     :param config:
@@ -116,7 +116,7 @@ def faster_rcnn(config, stage='train'):
     input_image_meta = Input(shape=(12,))
 
     # 通过CNN提取特征
-    features = feature_extractor(input_image)
+    features = feature_extractor(input_image, model=backbone)
 
     # 训练rpn 得到回归和分类分
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
