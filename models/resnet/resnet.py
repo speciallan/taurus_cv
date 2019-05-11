@@ -136,7 +136,7 @@ def resnet34(input, classes_num=1000, is_extractor=False):
 
         return Model(input, preds, name='resnet34')
 
-def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_transfer_learning=False):
+def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, output_layer_name = None, is_transfer_learning=False):
     """
     ResNet50
     :param input: 输入Keras.Input
@@ -168,9 +168,6 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_trans
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='c')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='d')
 
-    # 确定fine-turning层
-    no_train_model = Model(inputs=input, outputs=x)
-
     # conv4 [256,256,1024]*6
     x = conv_block(x, 3, [256, 256, 1024], stage=4, block='a')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='b')
@@ -185,6 +182,9 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_trans
         x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
         x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
 
+    # 确定fine-turning层
+    no_train_model = Model(inputs=input, outputs=x)
+
     # 用作特征提取器做迁移学习
     if is_extractor:
 
@@ -196,6 +196,9 @@ def resnet50(input, classes_num=1000, layer_num=50, is_extractor=False, is_trans
             #     l.trainable = True
             # else:
             #     l.trainable = False
+
+        if output_layer_name:
+            return no_train_model.get_layer(output_layer_name).output
 
         return x
 

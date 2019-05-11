@@ -9,19 +9,19 @@ from keras.layers import *
 # 定义一个backbone
 def ddnet(input, classes_num=2, is_extractor=False):
 
-    x = Conv2D(32, (3, 3), padding='same', activation='relu', kernel_initializer='normal')(input)
+    x = Conv2D(32, (3, 3), padding='same', activation='relu', kernel_initializer='normal', name='conv1')(input)
     # x = BatchNormalization()(x)
     # x = Activation('relu')(x)
     x = MaxPooling2D()(x)
 
-    x = Conv2D(64, (3, 3), padding='same', activation='relu', kernel_initializer='normal')(x)
-    x = Conv2D(64, (3, 3), padding='same', activation='relu', kernel_initializer='normal')(x)
+    x = Conv2D(64, (3, 3), padding='same', activation='relu', kernel_initializer='normal', name='conv2')(x)
+    x = Conv2D(64, (3, 3), padding='same', activation='relu', kernel_initializer='normal', name='conv3')(x)
     # x = BatchNormalization()(x)
     # x = Activation('relu')(x)
     x = MaxPooling2D()(x)
 
-    x = Conv2D(128, (3, 3), padding='same', activation='relu', kernel_initializer='normal')(x)
-    x = Conv2D(128, (3, 3), padding='same', activation='relu', kernel_initializer='normal')(x)
+    x = Conv2D(128, (3, 3), padding='same', activation='relu', kernel_initializer='normal', name='conv4')(x)
+    x = Conv2D(128, (3, 3), padding='same', activation='relu', kernel_initializer='normal', name='conv5')(x)
     # x = BatchNormalization()(x)
     # x = Activation('relu')(x)
     # x = MaxPooling2D()(x)

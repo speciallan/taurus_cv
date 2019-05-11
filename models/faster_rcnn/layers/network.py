@@ -54,7 +54,7 @@ def rpn_net(config, stage='train', backbone=None):
     input_image_meta = Input(batch_shape=(batch_size, 12))
 
     # 特征及预测结果 (1,32,32,1024)
-    features = feature_extractor(input_image, model=backbone)
+    features = feature_extractor(input_image, model=backbone, output_layer_name=config.backbone_output_layer_name)
 
     # 定义rpn网络 得到分类和回归值
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
