@@ -116,7 +116,7 @@ def faster_rcnn(config, stage='train', backbone=None):
     input_image_meta = Input(shape=(12,))
 
     # 通过CNN提取特征
-    features = feature_extractor(input_image, model=backbone)
+    features = feature_extractor(input_image, model=backbone, output_layer_name=config.backbone_output_layer_name)
 
     # 训练rpn 得到回归和分类分
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
@@ -188,7 +188,7 @@ def faster_rcnn(config, stage='train', backbone=None):
 
         # 应用分类和回归生成最终检测框
         detect_boxes, class_scores, detect_class_ids, detect_class_logits = ProposalToDetectBox(
-            score_threshold=0.05,
+            score_threshold=0.01,
             output_box_num=100,
             name='proposals2detectboxes'
         )([rcnn_deltas, rcnn_class_logits, proposal_boxes])
