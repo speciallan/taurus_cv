@@ -241,6 +241,7 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
     gt_boxes = tf_utils.remove_pad(gt_boxes)
     gt_class_ids = tf_utils.remove_pad(gt_class_ids)[:, 0]  # 从[N,1]变为[N]
     proposals = tf_utils.remove_pad(proposals)
+
     # 计算iou
     iou = compute_iou(gt_boxes, proposals)
 
@@ -256,6 +257,7 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
     indices = tf.unique(gt_iou_argmax)[0]  # 被选中的索引
     all_indices = tf.range(tf.shape(proposals)[0])  # 所有的索引
     remainder_indices = tf.setdiff1d(all_indices, tf.cast(indices, tf.int32))[0]  # 剩余的索引
+
     # 剩余的proposals和iou
     proposals = tf.gather(proposals, remainder_indices)
     iou = tf.gather(iou, remainder_indices, axis=1)
@@ -275,6 +277,7 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
     #gt_boxes_pos = tf.concat([gt_boxes_pos_1, gt_boxes_pos_2], axis=0)
     #class_ids = tf.concat([gt_class_ids_pos_1, gt_class_ids_pos_2], axis=0)
     #proposal_pos = tf.concat([proposal_pos_1, proposal_pos_2], axis=0)
+
     gt_boxes_pos = gt_boxes_pos_2
     class_ids = gt_class_ids_pos_2
     proposal_pos = proposal_pos_2
@@ -290,9 +293,11 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
 
     # 负样本：与所有GT的iou<0.5
     proposal_neg_idx = tf.where(proposal_iou_max < 0.5)
+
     # 确定负样本数量
     negative_num = tf.minimum(train_rois_per_image - positive_num, tf.shape(proposal_neg_idx)[0])
     proposal_neg_idx = tf.random_shuffle(proposal_neg_idx)[:negative_num]
+
     # 收集负样本
     proposal_neg = tf.gather_nd(proposals, proposal_neg_idx)
     class_ids_neg = tf.zeros(shape=[negative_num])  # 背景类，类别id为0
@@ -306,11 +311,14 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
     # 计算padding
     class_ids, train_rois = tf_utils.pad_list_to_fixed_size(
         [tf.expand_dims(class_ids, axis=1), train_rois], train_rois_per_image)  # class_ids分类扩一维
+
     # 为后续处理方便负样本tag设置为-1
     deltas = tf_utils.pad_to_fixed_size_with_negative(deltas, train_rois_per_image, negative_num=negative_num)
+
     # 其它统计指标
     gt_num = tf.shape(gt_class_ids)[0]  # GT数
     miss_match_gt_num = gt_num - tf.shape(tf.unique(gt_pos_idx)[0])[0]  # 未分配anchor的GT
+
     return [deltas, class_ids, train_rois, tf.cast(miss_match_gt_num, tf.float32)]
 
 
@@ -345,6 +353,7 @@ class DetectTarget(keras.layers.Layer):
         #outputs = tf.map_fn(lambda x: detect_targets_graph(*x, **options),
         #                    elems=[gt_boxes, gt_class_ids, proposals],
         #                    dtype=[tf.float32] * 4)
+
         outputs = tf_utils.batch_slice([gt_boxes, gt_class_ids, proposals],
                                        lambda x, y, z: detect_targets_graph(x, y, z, self.train_rois_per_image,
                                                                             self.roi_positive_ratio),

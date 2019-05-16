@@ -74,14 +74,21 @@ def rpn_net(config, stage='train', backbone=None):
 
     if stage == 'train':
 
-        # 生成分类和回归目标 deltas为处理后的box
+        # 通过gt_boxes将anchors分为正负样本
         rpn_targets = RpnTarget(batch_size, config.RPN_TRAIN_ANCHORS_PER_IMAGE, name='rpn_target')([input_boxes, input_class_ids, anchors])  # [deltas,cls_ids,indices,..]
 
-        # gt_boxs,gt_cls_ids,anchors
+        # deltas筛选后的boxes, anchor_indices
+        """
+        anchor_indices中
+        
+        :param indices: 正负样本索引，(batch_num,rpn_train_anchors,(idx,tag))，
+               idx:指定anchor索引位置，tag 1：正样本，0：负样本，-1 padding
+        """
         deltas, cls_ids, anchor_indices = rpn_targets[:3]
 
         # 定义损失layer
         cls_loss = Lambda(lambda x: rpn_cls_loss(*x), name='rpn_class_loss')([class_logits, cls_ids, anchor_indices])
+
         regress_loss = Lambda(lambda x: rpn_regress_loss(*x), name='rpn_bbox_loss')([boxes_regress, deltas, anchor_indices])
 
         # 训练阶段，得到分类和回归损失
@@ -142,6 +149,7 @@ def faster_rcnn(config, stage='train', backbone=None):
                                          output_box_num=output_box_num,
                                          iou_threshold=config.RPN_NMS_THRESHOLD,
                                          name='rpn2proposals')([boxes_regress, class_logits, anchors])
+
     # proposal裁剪到图像窗口内
     proposal_boxes_coordinate, proposal_boxes_tag = Lambda(lambda x: [x[..., :4], x[..., 4:]])(proposal_boxes)
 
@@ -152,9 +160,12 @@ def faster_rcnn(config, stage='train', backbone=None):
     # 最后再合并tag返回
     proposal_boxes = Lambda(lambda x: tf.concat(x, axis=-1))([proposal_boxes_coordinate, proposal_boxes_tag])
 
+    # --------------------------- 训练阶段 ---------------------------
     if stage == 'train':
 
-        # 生成分类和回归目标
+        # -------- rpn start --------
+
+        # 生成rpn分类和回归目标
         rpn_targets = RpnTarget(batch_size, config.RPN_TRAIN_ANCHORS_PER_IMAGE, name='rpn_target')([gt_boxes, gt_class_ids, anchors])  # [deltas,cls_ids,indices,..]
 
         rpn_deltas, rpn_cls_ids, anchor_indices = rpn_targets[:3]
@@ -163,21 +174,26 @@ def faster_rcnn(config, stage='train', backbone=None):
         cls_loss_rpn = Lambda(lambda x: rpn_cls_loss(*x), name='rpn_class_loss')([class_logits, rpn_cls_ids, anchor_indices])
         regress_loss_rpn = Lambda(lambda x: rpn_regress_loss(*x), name='rpn_bbox_loss')([boxes_regress, rpn_deltas, anchor_indices])
 
-        # 检测网络的分类和回归目标，根据gt和iou淘汰一部分
-        # IoU>=0.5的为正样本；IoU<0.5的为负样本
+        # -------- rpn done --------
+
+        # -------- detect start --------
+        # 检测网络的分类和回归目标，根据gt和iou淘汰一部分 IoU>=0.5的为正样本；IoU<0.5的为负样本
         roi_deltas, roi_class_ids, train_rois, _ = DetectTarget(batch_size, config.TRAIN_ROIS_PER_IMAGE, config.ROI_POSITIVE_RATIO, name='rcnn_target')([gt_boxes, gt_class_ids, proposal_boxes])
 
-        # 检测网络 RoiHead
+        # 检测网络 RoiHead  最后特征图7x7 用7x7卷积得到1x1
         rcnn_deltas, rcnn_class_logits = roi_head(features, train_rois, config.NUM_CLASSES, config.IMAGE_MIN_DIM, pool_size=(7, 7), fc_layers_size=1024)
 
         # 检测网络损失函数 rcnn_deltas是gt_bbox,roi_deltas是bbox
         regress_loss_rcnn = Lambda(lambda x: detect_regress_loss(*x), name='rcnn_bbox_loss')([rcnn_deltas, roi_deltas, roi_class_ids])
         cls_loss_rcnn = Lambda(lambda x: detect_cls_loss(*x), name='rcnn_class_loss')([rcnn_class_logits, roi_class_ids])
 
+        # -------- detect done --------
+
         # 端到端训练，得到4类损失
         return Model(inputs=[input_image, input_image_meta, gt_class_ids, gt_boxes],
                      outputs=[cls_loss_rpn, regress_loss_rpn, regress_loss_rcnn, cls_loss_rcnn])
 
+    # --------------------------- 预测阶段 ---------------------------
     else:
 
         # 预测网络

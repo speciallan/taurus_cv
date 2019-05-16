@@ -12,10 +12,10 @@ from keras.layers import TimeDistributed, Conv2D, BatchNormalization, Activation
 from taurus_cv.models.faster_rcnn.layers.roi_align import RoiAlign
 
 
-def roi_head(base_layers, rois, num_classes, image_max_dim, pool_size=(7, 7), fc_layers_size=1024):
+def roi_head(features, rois, num_classes, image_max_dim, pool_size=(7, 7), fc_layers_size=1024):
 
     # 候选框投影到特征图
-    x = RoiAlign(image_max_dim)([base_layers, rois])  #
+    x = RoiAlign(image_max_dim)([features, rois])  #
 
     # 用卷积来实现两个全连接
     x = TimeDistributed(Conv2D(fc_layers_size, pool_size, padding='valid'), name='rcnn_fc1')(x)  # 变为(batch_size,roi_num,1,1,channels)

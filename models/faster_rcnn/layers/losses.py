@@ -7,6 +7,7 @@
 """
 
 import tensorflow as tf
+import keras.backend as K
 
 
 def rpn_cls_loss(predict_cls_ids, true_cls_ids, indices):
@@ -20,9 +21,12 @@ def rpn_cls_loss(predict_cls_ids, true_cls_ids, indices):
     :return:
     """
 
-    # 去除padding
+    # 去除padding 要训练的anchors样本索引
     train_indices = tf.where(tf.not_equal(indices[:, :, -1], 0))  # 0为padding
+
     train_anchor_indices = tf.gather_nd(indices[..., 0], train_indices)  # 一维(batch*train_num,)，每个训练anchor的索引
+
+    # 获取要训练的gt样本
     true_cls_ids = tf.gather_nd(true_cls_ids[..., 0], train_indices)  # 一维(batch*train_num,)
 
     # 转为onehot编码
@@ -37,7 +41,7 @@ def rpn_cls_loss(predict_cls_ids, true_cls_ids, indices):
     # 每个训练anchor的2维索引
     train_indices_2d = tf.stack([batch_indices, tf.cast(train_anchor_indices, dtype=tf.int64)], axis=1)
 
-    # 获取预测的anchors类别
+    # 获取要训练的predict结果
     predict_cls_ids = tf.gather_nd(predict_cls_ids, train_indices_2d)  # (batch*train_num,2)
 
     # 交叉熵损失函数
@@ -67,20 +71,26 @@ def rpn_regress_loss(predict_deltas, deltas, indices):
              idx:指定anchor索引位置，最后一位为tag, tag=0 为padding; 1为正样本，-1为负样本
     :return:
     """
-    # 去除padding和负样本
+
+    # 负例不用于回归训练 去除padding和负样本
     positive_indices = tf.where(tf.equal(indices[:, :, -1], 1))
+
+    # 从boxes中根据索引取，这里取出所有正样本的boxes
     deltas = tf.gather_nd(deltas[..., :-1], positive_indices)  # (n,(dy,dx,dw,dh))
+
+    # 正样本索引
     true_positive_indices = tf.gather_nd(indices[..., 0], positive_indices)  # 一维，正anchor索引
 
     # batch索引
     batch_indices = positive_indices[:, 0]
-    # 正样本anchor的2维索引
+
+    # 正样本anchor的2维索引, 堆叠到一起
     train_indices_2d = tf.stack([batch_indices, tf.cast(true_positive_indices, dtype=tf.int64)], axis=1)
+
     # 正样本anchor预测的回归类型
     predict_deltas = tf.gather_nd(predict_deltas, train_indices_2d, name='rpn_regress_loss_predict_deltas')
 
     # Smooth-L1 # 非常重要，不然报NAN
-    import keras.backend as K
     loss = K.switch(tf.size(deltas) > 0,
                     smooth_l1_loss(deltas, predict_deltas),
                     tf.constant(0.0))
@@ -116,8 +126,10 @@ def detect_regress_loss(predict_deltas, deltas, class_ids):
     :param class_ids: 实际类别(batch_num, train_roi_num, (class_id,tag)) ,tag：0-padding,-1-负样本,1-正样本
     :return:
     """
-    # 去除padding和负样本，保留正样本
+    # 去除padding和负样本，保留正样本 tag=1
     indices = tf.where(tf.equal(deltas[..., -1], 1))  # 二维的(N,2)
+
+    # 从boxes中根据索引取，这里取出所有正样本的classid, boxes
     deltas = tf.gather_nd(deltas[..., :-1], indices)
     class_ids = tf.gather_nd(class_ids[..., :-1], indices)  # 二维的(N,1)
 

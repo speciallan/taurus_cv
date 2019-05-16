@@ -60,7 +60,10 @@ class RpnToProposal(keras.layers.Layer):
         #                     elems=[proposals, fg_scores, class_logits],
         #                     dtype=[tf.float32] * 3)
         # # 非极大抑制
-        proposals = tf_utils.batch_slice([deltas, anchors], lambda x, y: apply_regress(x, y), self.batch_size)
+
+        proposals = tf_utils.batch_slice([deltas, anchors],
+                                         lambda x, y: apply_regress(x, y),
+                                         self.batch_size)
 
         outputs = tf_utils.batch_slice([proposals, fg_scores, class_logits],
                                        lambda x, y, z: nms(x, y, z,
@@ -84,6 +87,8 @@ class RpnToProposal(keras.layers.Layer):
 def apply_regress(deltas, anchors):
     """
     应用回归目标到边框
+    这个的目的是什么？
+
     :param deltas: 回归目标[N,(dy, dx, dh, dw)]
     :param anchors: anchor boxes[N,(y1,x1,y2,x2)]
     :return:
@@ -130,6 +135,8 @@ def nms(boxes, scores, class_logits, max_output_size, iou_threshold=0.5, score_t
     :return: 检测边框、边框得分、边框类别
     """
     indices = tf.image.non_max_suppression(boxes, scores, max_output_size, iou_threshold, score_threshold, name)  # 一维索引
+
+    # 通过索引进行筛选
     output_boxes = tf.gather(boxes, indices)  # (M,4)
     class_scores = tf.expand_dims(tf.gather(scores, indices), axis=1)  # 扩展到二维(M,1)
     class_logits = tf.gather(class_logits, indices)
