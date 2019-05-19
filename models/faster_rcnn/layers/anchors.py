@@ -58,7 +58,7 @@ class Anchor(keras.layers.Layer):
         #     print(math.sqrt((v[2]-v[0])*(v[3]-v[1])))
         # exit()
 
-        # 得到(M*N,9,4)的anchors
+        # 得到(M*N,9,4)的anchors, [1:3]是w和h
         anchors = shift(features_shape[1:3], self.strides, base_anchors)
 
         # 扩展第一维，batch_size;每个样本都有相同的anchors (1,M*N,9,4)
@@ -142,13 +142,14 @@ if __name__ == '__main__':
     # spe(np.vstack((arr1, arr2)), np.hstack((arr1, arr2)))
 
     sess = tf.Session()
-    achrs = generate_anchors(64, [0.5, 1, 2], [1, 2, 4])
+    achrs = generate_anchors(8, [1], [1, 2, 4])
     # h,w
     # (45,90) (90,180)  (180,360)
     # (64,64) (128,128) (256,256)
     # (90,45) (180,90)  (360,180)
-    spe(achrs.shape, achrs)
+    # spe(achrs.shape, achrs)
 
-    all_achrs = shift([3, 3], 32, achrs)
+    # 特征图h,w
+    all_achrs = shift([3, 3], 4, achrs)
     print(sess.run(tf.shape(all_achrs)))
     print(sess.run(all_achrs))

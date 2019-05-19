@@ -30,7 +30,7 @@ class Config(object):
     BACKBONE = 'resnet50'
 
     # 用于空洞卷积（目前没用）
-    BACKBONE_STRIDES = [4, 8, 16, 32, 64]
+    # BACKBONE_STRIDES = [4, 8, 16, 32, 64]
 
     # 用于FPN（目前没用）
     FPN_CLF_FC_SIZE = 1024
@@ -39,7 +39,7 @@ class Config(object):
     NUM_CLASSES = 1
 
     # 网络步长
-    BACKBONE_STRIDE = 16
+    BACKBONE_STRIDES = [16]
 
     # anchors
     RPN_ANCHOR_BASE_SIZE = 64
