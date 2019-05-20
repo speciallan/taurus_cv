@@ -19,6 +19,7 @@ from taurus_cv.models.faster_rcnn.layers import network
 from taurus_cv.models.faster_rcnn.utils import visualize, np_utils
 from taurus_cv.models.faster_rcnn.preprocessing.image import load_image_gt
 from taurus_cv.models.faster_rcnn.training import trainer
+from taurus_cv.utils.spe import spe
 
 
 def inference(config, output_dir):
@@ -78,6 +79,7 @@ def inference(config, output_dir):
 
     save_img_filename = output_dir + '/inference_examples_{}.png'.format(np.random.randint(10))
     fig.savefig(save_img_filename)
+
     print('可视化到:{}'.format(save_img_filename))
 
 

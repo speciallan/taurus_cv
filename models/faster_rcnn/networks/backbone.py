@@ -27,6 +27,7 @@ def feature_extractor(input, is_extractor=True, model=None, output_layer_name=No
     else:
 
         x = model(input,
-                  is_extractor=is_extractor)
+                  is_extractor=is_extractor,
+                  output_layer_name=output_layer_name)
         return x
 

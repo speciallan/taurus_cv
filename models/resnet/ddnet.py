@@ -7,7 +7,7 @@ from keras.layers import *
 
 
 # 定义一个backbone
-def ddnet(input, classes_num=2, is_extractor=False):
+def ddnet(input, classes_num=2, is_extractor=False, output_layer_name='dd_conv5'):
 
     x = Conv2D(32, (3, 3), padding='same', activation='relu', kernel_initializer='normal', name='dd_conv1')(input)
     # x = BatchNormalization()(x)

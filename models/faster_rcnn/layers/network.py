@@ -64,7 +64,7 @@ def rpn_net(config, stage='train', backbone=None):
     anchors = Anchor(config.RPN_ANCHOR_BASE_SIZE,
                      config.RPN_ANCHOR_RATIOS,
                      config.RPN_ANCHOR_SCALES,
-                     config.BACKBONE_STRIDES, name='gen_anchors')(features)
+                     config.BACKBONE_STRIDE, name='gen_anchors')(features)
 
     # 裁剪到窗口内 得到512x512内的anchors
     anchors = UniqueClipBoxes(config.IMAGE_INPUT_SHAPE, name='clip_anchors')(anchors)
@@ -132,7 +132,7 @@ def faster_rcnn(config, stage='train', backbone=None):
     anchors = Anchor(config.RPN_ANCHOR_BASE_SIZE,
                      config.RPN_ANCHOR_RATIOS,
                      config.RPN_ANCHOR_SCALES,
-                     config.BACKBONE_STRIDES, name='gen_anchors')(features)
+                     config.BACKBONE_STRIDE, name='gen_anchors')(features)
 
     # 裁剪到输入形状内
     anchors = UniqueClipBoxes(clip_box_shape=config.IMAGE_INPUT_SHAPE, name='clip_anchors')(anchors)

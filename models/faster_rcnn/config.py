@@ -36,10 +36,10 @@ class Config(object):
     FPN_CLF_FC_SIZE = 1024
 
     # RPN分类数量（前景）
-    NUM_CLASSES = 1
+    NUM_CLASSES = 1 + 1
 
     # 网络步长
-    BACKBONE_STRIDES = [16]
+    BACKBONE_STRIDE = 16
 
     # anchors
     RPN_ANCHOR_BASE_SIZE = 64
@@ -48,7 +48,7 @@ class Config(object):
     RPN_ANCHOR_NUM = len(RPN_ANCHOR_SCALES) * len(RPN_ANCHOR_RATIOS)
 
     # RPN提议框非极大抑制阈值(训练时可以增加该值来增加提议框)
-    RPN_NMS_THRESHOLD = 0.3
+    RPN_NMS_THRESHOLD = 0.7
 
     # 每张图像训练anchors个数
     RPN_TRAIN_ANCHORS_PER_IMAGE = 256

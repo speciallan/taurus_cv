@@ -5,7 +5,7 @@
 from keras import Model, Input
 from keras.layers import *
 
-def snet(input, classes_num=2, is_extractor=False):
+def snet(input, classes_num=2, is_extractor=False, output_layer_name='snet_pool'):
 
     x = Conv2D(filters=16, kernel_size=(3, 3), strides=2, activation='relu', padding='same', name='snet_conv1')(input)
     x = Conv2D(16, (1, 1), strides=1, activation='relu', padding='same', name='snet_conv2')(x)
