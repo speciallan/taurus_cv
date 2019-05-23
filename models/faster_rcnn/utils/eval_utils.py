@@ -124,12 +124,15 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
     num_classes = len(all_annotations[0])
     num_images = len(all_detections)
     average_precisions = {}
+
     # 逐个类别计算ap
     for class_id in range(num_classes):
+
         true_positives = np.zeros((0,), dtype=np.float64)
         false_positives = np.zeros((0,), dtype=np.float64)
         scores = np.zeros((0,), dtype=np.float64)
         num_gt_boxes = 0.0
+
         # 逐个图像处理
         for image_id in range(num_images):
             gt_boxes = all_annotations[image_id][class_id]  # (n,y1,x1,y2,x2)
@@ -149,6 +152,7 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
                 iou = np_utils.compute_iou(gt_boxes, np.expand_dims(detect_box[:4], axis=0))  # n vs 1
                 max_iou = np.max(iou, axis=0)[0]  # 与GT边框的最大iou值
                 argmax_iou = np.argmax(iou, axis=0)[0]  # 最大iou值对应的GT
+
                 # 如果超过iou阈值,且之前没有检测框匹配
                 if max_iou >= iou_threshold and argmax_iou not in detected_gt_boxes:
                     true_positives = np.append(true_positives, 1)
@@ -170,6 +174,8 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         # 计算召回率和精度
         recall = true_positives / num_gt_boxes
         precision = true_positives / np.maximum(true_positives + false_positives, np.finfo(np.float64).eps)
+        print('recall:{}'.format(recall))
+        print('precision:{}'.format(precision))
 
         # 计算ap
         average_precisions[class_id] = voc_ap(recall, precision, use_07_metric=use_07_metric)
