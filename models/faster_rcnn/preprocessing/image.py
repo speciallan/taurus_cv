@@ -80,6 +80,28 @@ def resize_image(image, max_dim):
     window = (top_pad, left_pad, h + top_pad, w + left_pad)  #
     return image.astype(image_dtype), window, scale, padding
 
+def resize_meta(h, w, max_dim):
+    """
+    计算resize的元数据信息
+    :param h: 图像原始高度
+    :param w: 图像原始宽度
+    :param max_dim: 缩放后的边长
+    :return:
+    """
+    scale = max_dim / max(h, w)  # 缩放尺寸
+    # 新的高度和宽度
+    h, w = round(h * scale), round(w * scale)
+
+    # 计算padding
+    top_pad = (max_dim - h) // 2
+    bottom_pad = max_dim - h - top_pad
+    left_pad = (max_dim - w) // 2
+    right_pad = max_dim - w - left_pad
+    padding = [(top_pad, bottom_pad), (left_pad, right_pad), (0, 0)]
+    # 计算窗口
+    window = (top_pad, left_pad, h + top_pad, w + left_pad)  #
+    return h, w, window, scale, padding
+
 
 def compose_image_meta(image_id, original_image_shape, image_shape,
                        window, scale):

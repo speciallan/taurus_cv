@@ -9,6 +9,7 @@
 import keras
 import tensorflow as tf
 from taurus_cv.models.faster_rcnn.utils import tf_utils
+from taurus_cv.models.faster_rcnn.config import current_config as config
 from taurus_cv.utils.spe import spe
 
 
@@ -264,7 +265,8 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
 
     # 正样本每个proposal 最大的iou,且iou>=0.5
     proposal_iou_max = tf.reduce_max(iou, axis=0)
-    proposal_pos_idx = tf.where(proposal_iou_max >= 0.5)  # 正样本proposal对应的索引号,二维
+    print(iou, proposal_iou_max)
+    proposal_pos_idx = tf.where(proposal_iou_max >= config.DETECTION_POSITIVE_THRESHOLD)  # 正样本proposal对应的索引号,二维
 
     proposal_iou_argmax = tf.argmax(iou, axis=0)
     gt_pos_idx = tf.gather_nd(proposal_iou_argmax, proposal_pos_idx)  # 对应的GT 索引号，一维的
@@ -292,7 +294,7 @@ def detect_targets_graph(gt_boxes, gt_class_ids, proposals, train_rois_per_image
     deltas = regress_target(proposal_pos, gt_boxes_pos)
 
     # 负样本：与所有GT的iou<0.5
-    proposal_neg_idx = tf.where(proposal_iou_max < 0.5)
+    proposal_neg_idx = tf.where(proposal_iou_max < config.DETECTION_NEGATIVE_THRESHOLD)
 
     # 确定负样本数量
     negative_num = tf.minimum(train_rois_per_image - positive_num, tf.shape(proposal_neg_idx)[0])

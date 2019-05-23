@@ -47,8 +47,12 @@ class Config(object):
     RPN_ANCHOR_RATIOS = [0.5, 1, 2]
     RPN_ANCHOR_NUM = len(RPN_ANCHOR_SCALES) * len(RPN_ANCHOR_RATIOS)
 
-    # RPN提议框非极大抑制阈值(训练时可以增加该值来增加提议框)
-    RPN_NMS_THRESHOLD = 0.7
+    # 不同数据集这个阈值不同
+    RPN_SCORE_THRESHOLD = 0.1
+
+    # RPN提议框非极大抑制阈值(训练时可以增加该值来增加提议框) 越小框越少 训练时用0.9有很多rois
+    RPN_NMS_THRESHOLD_TRAIN = 0.9 # 获取几乎所有正确rois
+    RPN_NMS_THRESHOLD_INFERENCE = 0.01 # 获取最好的无重叠roi
 
     # 每张图像训练anchors个数
     RPN_TRAIN_ANCHORS_PER_IMAGE = 256
@@ -73,6 +77,10 @@ class Config(object):
 
     # 最大最终检测实例数
     DETECTION_MAX_INSTANCES = 100
+
+    # 训练时通过roi和gt 的iou生成正负例 <0.2负 >=0.2正
+    DETECTION_POSITIVE_THRESHOLD=0.2
+    DETECTION_NEGATIVE_THRESHOLD=0.2
 
     # 检测最小置信度
     DETECTION_MIN_CONFIDENCE = 0.7

@@ -25,7 +25,8 @@ def detect_boxes(boxes, class_logits, max_output_size, iou_threshold=0.5, score_
     # 类别得分和预测类别
     class_scores = tf.reduce_max(tf.nn.softmax(class_logits, axis=-1), axis=-1)  # [num_boxes]
     class_ids = tf.argmax(class_logits, axis=-1)  # [num_boxes]
-    # 过滤背景类别0
+
+    # 过滤背景类别0 , >=0则输出所有类别的框
     keep = tf.where(class_ids > 0)  # 保留的索引号
     keep_class_scores = tf.gather_nd(class_scores, keep)
     keep_class_ids = tf.gather_nd(class_ids, keep)
@@ -36,6 +37,7 @@ def detect_boxes(boxes, class_logits, max_output_size, iou_threshold=0.5, score_
     unique_class_ids = tf.unique(class_ids)[0]
 
     def per_class_nms(class_id):
+
         # 当前类别的索引
         idx = tf.where(tf.equal(keep_class_ids, class_id))  # [n,1]
         cur_class_scores = tf.gather_nd(keep_class_scores, idx)
@@ -48,14 +50,17 @@ def detect_boxes(boxes, class_logits, max_output_size, iou_threshold=0.5, score_
                                                score_threshold)  # 一维索引
         # 映射索引
         idx = tf.gather(idx, indices)  # [m,1]
+
         # padding值为 -1
         pad_num = tf.maximum(0, max_output_size - tf.shape(idx)[0])
         return tf.pad(idx, paddings=[[0, pad_num], [0, 0]], mode='constant', constant_values=-1)
 
     # 经过类别nms后保留的class_id 索引
     nms_keep = tf.map_fn(fn=per_class_nms, elems=unique_class_ids)  # (s,max_output_size,1)
+
     # 打平
     nms_keep = tf.reshape(nms_keep, shape=[-1])  # [s]
+
     # 去除padding
     nms_keep = tf.gather_nd(nms_keep, tf.where(nms_keep > -1))  # [s]
 
@@ -111,12 +116,11 @@ class ProposalToDetectBox(keras.layers.Layer):
         proposals = inputs[2][..., :-1]  # 去除tag列
 
         # 应用边框回归
-
         boxes = tf.map_fn(lambda x: apply_regress(*x),
                           elems=[deltas, proposals],
                           dtype=tf.float32)
 
-        # # 非极大抑制
+        # 非极大抑制
         options = {"max_output_size": self.output_box_num,
                    "iou_threshold": self.iou_threshold,
                    "score_threshold": self.score_threshold}

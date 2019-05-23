@@ -100,7 +100,8 @@ def rpn_net(config, stage='train', backbone=None):
         # (1,?,5) (1,?,2)
         detect_boxes, class_scores, _ = RpnToProposal(batch_size,
                                                       output_box_num=config.POST_NMS_ROIS_INFERENCE,
-                                                      iou_threshold=config.RPN_NMS_THRESHOLD,
+                                                      score_threshold=config.RPN_SCORE_THRESHOLD,
+                                                      iou_threshold=config.RPN_NMS_THRESHOLD_INFERENCE,
                                                       name='rpn2proposals')([boxes_regress, class_logits, anchors])
 
         # 预测阶段，通过rpn获取候选框，得到候选框和置信度
@@ -143,12 +144,16 @@ def faster_rcnn(config, stage='train', backbone=None):
 
     # 应用分类和回归生成proposal，通过NMS后保留2000个候选框
     output_box_num = config.POST_NMS_ROIS_TRAIN if stage == 'train' else config.POST_NMS_ROIS_INFERENCE
+    iou_threshold = config.RPN_NMS_THRESHOLD_TRAIN if stage == 'train' else config.RPN_NMS_THRESHOLD_INFERENCE
 
     # 通过rpn后的候选框和anchors计算iou淘汰一部分，再走NMS过滤，得到最后的候选框rois [proprosal_boxes,fg_scores,class_logits]
     proposal_boxes, _, _ = RpnToProposal(batch_size,
-                                         output_box_num=output_box_num,
-                                         iou_threshold=config.RPN_NMS_THRESHOLD,
+                                         output_box_num=config.POST_NMS_ROIS_INFERENCE,
+                                         score_threshold=config.RPN_SCORE_THRESHOLD,
+                                         iou_threshold=iou_threshold,
                                          name='rpn2proposals')([boxes_regress, class_logits, anchors])
+
+    # 上面是从rpn输出的rois
 
     # proposal裁剪到图像窗口内
     proposal_boxes_coordinate, proposal_boxes_tag = Lambda(lambda x: [x[..., :4], x[..., 4:]])(proposal_boxes)
@@ -195,8 +200,7 @@ def faster_rcnn(config, stage='train', backbone=None):
 
     # --------------------------- 预测阶段 ---------------------------
     else:
-
-        # 预测网络
+        # 预测网络 (?,10,2,4)
         rcnn_deltas, rcnn_class_logits = roi_head(features, proposal_boxes, config.NUM_CLASSES, config.IMAGE_MIN_DIM, pool_size=(7, 7), fc_layers_size=1024)
 
         # 处理类别相关
@@ -204,10 +208,15 @@ def faster_rcnn(config, stage='train', backbone=None):
 
         # 应用分类和回归生成最终检测框
         detect_boxes, class_scores, detect_class_ids, detect_class_logits = ProposalToDetectBox(
-            score_threshold=0.01,
-            output_box_num=100,
+            score_threshold=config.DETECTION_NMS_THRESHOLD,
+            iou_threshold=config.DETECTION_MIN_CONFIDENCE,
+            output_box_num=output_box_num,
             name='proposals2detectboxes'
         )([rcnn_deltas, rcnn_class_logits, proposal_boxes])
+
+        # test
+        # return Model(inputs=[input_image, input_image_meta],
+        #              outputs=[proposal_boxes, rcnn_deltas, rcnn_class_logits, detect_boxes, class_scores, detect_class_ids])
 
         # 裁剪到窗口内部
         detect_boxes_coordinate, detect_boxes_tag = Lambda(lambda x: [x[..., :4], x[..., 4:]])(detect_boxes)
@@ -215,6 +224,7 @@ def faster_rcnn(config, stage='train', backbone=None):
 
         # 最后再合并tag返回
         detect_boxes = Lambda(lambda x: tf.concat(x, axis=-1))([detect_boxes_coordinate, detect_boxes_tag])
+
 
         # detect_boxes (?,?,5) boxes_regress(?,?,4) proposal_boxes(1,?,5)
         # detect_boxes = boxes_regress[:,:,:4]

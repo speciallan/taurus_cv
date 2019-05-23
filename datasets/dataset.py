@@ -96,7 +96,9 @@ class VocDetectionDataset(VocDataset):
 
             image_info = {"filename": img_info['filename'],
                           "filepath": img_info['filepath'],
-                          "type"    : img_info['imageset']}
+                          "type"    : img_info['imageset'],
+                          'height'  : img_info['height'],
+                          'width'   : img_info['width']}
             # GT 边框转换
             boxes, labels = [], []
 
