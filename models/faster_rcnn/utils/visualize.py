@@ -29,7 +29,7 @@ def display_instances(image, boxes, class_ids, class_names,
                       scores=None, title="",
                       figsize=(16, 16), ax=None,
                       show_bbox=True,
-                      colors=None, captions=None):
+                      colors=None, captions=None, filename=''):
     """
     可视化实例
     boxes: [num_instance, (y1, x1, y2, x2)] in image coordinates.
@@ -97,6 +97,7 @@ def display_instances(image, boxes, class_ids, class_names,
         # 写文字
         ax.text(x1, y1 - 4, caption, color='white', size=12, backgroundcolor='none') #none
 
+    ax.set_title(filename)
     ax.imshow(masked_image.astype(np.uint8))
 
     if auto_show:
