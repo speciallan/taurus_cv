@@ -208,8 +208,8 @@ def faster_rcnn(config, stage='train', backbone=None):
 
         # 应用分类和回归生成最终检测框
         detect_boxes, class_scores, detect_class_ids, detect_class_logits = ProposalToDetectBox(
-            score_threshold=config.DETECTION_NMS_THRESHOLD,
-            iou_threshold=config.DETECTION_MIN_CONFIDENCE,
+            score_threshold=config.DETECTION_MIN_CONFIDENCE,
+            iou_threshold=config.DETECTION_NMS_THRESHOLD,
             output_box_num=output_box_num,
             name='proposals2detectboxes'
         )([rcnn_deltas, rcnn_class_logits, proposal_boxes])
