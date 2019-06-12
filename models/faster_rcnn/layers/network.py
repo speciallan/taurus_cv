@@ -11,7 +11,7 @@ import keras
 from keras.models import Model
 from keras.layers import Input, Lambda
 
-from taurus_cv.models.faster_rcnn.networks.backbone import feature_extractor
+from taurus_cv.models.faster_rcnn.networks.backbone import feature_extractor, feature_extractor_with_fpn
 from taurus_cv.models.faster_rcnn.networks.rpn_net import rpn
 from taurus_cv.models.faster_rcnn.networks.head import roi_head
 from taurus_cv.models.faster_rcnn.layers.anchors import Anchor
@@ -54,7 +54,10 @@ def rpn_net(config, stage='train', backbone=None):
     input_image_meta = Input(batch_shape=(batch_size, 12))
 
     # 特征及预测结果 (1,32,32,1024)
-    features = feature_extractor(input_image, model=backbone, output_layer_name=config.backbone_output_layer_name)
+    if 'fpn' in backbone.__name__:
+        features = feature_extractor_with_fpn(input_image)
+    else:
+        features = feature_extractor(input_image, model=backbone, output_layer_name=config.backbone_output_layer_name)
 
     # 定义rpn网络 得到分类和回归值
     boxes_regress, class_logits = rpn(features, config.RPN_ANCHOR_NUM)
@@ -124,6 +127,10 @@ def faster_rcnn(config, stage='train', backbone=None):
     input_image_meta = Input(shape=(12,))
 
     # 通过CNN提取特征
+    spe(input_image)
+    features = feature_extractor_with_fpn(input_image)
+    spe(features)
+
     features = feature_extractor(input_image, model=backbone, output_layer_name=config.backbone_output_layer_name)
 
     # 训练rpn 得到回归和分类分
