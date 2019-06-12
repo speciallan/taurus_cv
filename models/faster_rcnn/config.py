@@ -106,6 +106,7 @@ class Config(object):
         "rcnn_bbox_loss": 1.
     }
 
+
 # PASCAL VOC2007数据集配置
 class VocConfig(Config):
 
@@ -153,6 +154,9 @@ class VocConfig(Config):
     voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
     voc_sub_dir = 'VOC2007'
     log_path = './logs'
+
+    # 特征提取的层
+    backbone_output_layer_name = None
 
     if not os.path.exists(config_filepath):
         print('找不到实验的config.ini')

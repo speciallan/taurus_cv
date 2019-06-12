@@ -14,14 +14,20 @@ TOP_DOWN_PYRAMID_SIZE = 256
 Implementation of Resnext FPN 
 """
 
+def resnext_fpn(input, classes_num=2, is_extractor=False, output_layer_name='final_upsample'):
 
-def resnext_fpn(input_shape, nb_labels, depth=(3, 4, 6, 3), cardinality=32, width=4, weight_decay=5e-4, batch_norm=True, batch_momentum=0.9, is_extractor=False):
+    x = _resnext_fpn(input=input)
+
+    return x
+
+
+def _resnext_fpn(input, nb_labels, depth=(3, 4, 6, 3), cardinality=32, width=4, weight_decay=5e-4, batch_norm=True, batch_momentum=0.9, is_extractor=False):
     """
     TODO: add dilated convolutions as well
     Resnext-50 is defined by (3, 4, 6, 3) [default]
     Resnext-101 is defined by (3, 4, 23, 3)
     Resnext-152 is defined by (3, 8, 23, 3)
-    :param input_shape:
+    :param input:
     :param nb_labels:
     :param depth:
     :param cardinality:
@@ -31,11 +37,9 @@ def resnext_fpn(input_shape, nb_labels, depth=(3, 4, 6, 3), cardinality=32, widt
     :param batch_momentum:
     :return:
     """
-    nb_rows, nb_cols, _ = input_shape
-    input_tensor = Input(shape=input_shape)
 
     bn_axis = 3
-    x = Conv2D(64, (7, 7), strides=(2, 2), padding='same', name='conv1', kernel_regularizer=l2(weight_decay))(input_tensor)
+    x = Conv2D(64, (7, 7), strides=(2, 2), padding='same', name='conv1', kernel_regularizer=l2(weight_decay))(input)
     if batch_norm:
         x = BatchNormalization(axis=bn_axis, name='bn_conv1', momentum=batch_momentum)(x)
     x = Activation('relu')(x)
@@ -70,6 +74,7 @@ def resnext_fpn(input_shape, nb_labels, depth=(3, 4, 6, 3), cardinality=32, widt
                                 Conv2D(TOP_DOWN_PYRAMID_SIZE, (1, 1), name='fpn_c3p3')(stage_3)])
     P2 = Add(name="fpn_p2add")([UpSampling2D(size=(2, 2), name="fpn_p3upsampled")(P3),
                                 Conv2D(TOP_DOWN_PYRAMID_SIZE, (1, 1), name='fpn_c2p2', padding='same')(stage_2)])
+
     # Attach 3x3 conv to all P layers to get the final feature maps. --> Reduce aliasing effect of upsampling
     P2 = Conv2D(TOP_DOWN_PYRAMID_SIZE, (3, 3), padding="SAME", name="fpn_p2")(P2)
     P3 = Conv2D(TOP_DOWN_PYRAMID_SIZE, (3, 3), padding="SAME", name="fpn_p3")(P3)
@@ -99,7 +104,7 @@ def resnext_fpn(input_shape, nb_labels, depth=(3, 4, 6, 3), cardinality=32, widt
     x = UpSampling2D(size=(4, 4), name="final_upsample")(x)
     x = Activation('sigmoid')(x)
 
-    model = Model(input_tensor, x)
+    model = Model(input, x)
 
     # 用作特征提取器做迁移学习
     if is_extractor:

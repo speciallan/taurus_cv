@@ -6,6 +6,6 @@
 基础模型
 """
 
-
 class BaseModel():
-    pass
+
+    with_fpn = False
