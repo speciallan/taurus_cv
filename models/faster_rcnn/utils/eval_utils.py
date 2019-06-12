@@ -174,8 +174,9 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         # 计算召回率和精度
         recall = true_positives / num_gt_boxes
         precision = true_positives / np.maximum(true_positives + false_positives, np.finfo(np.float64).eps)
-        print('recall:{}'.format(recall))
-        print('precision:{}'.format(precision))
+        print('class:{}'.format(class_id))
+        print('recall:{}'.format(recall[-1]) if len(recall) != 0 else recall)
+        print('precision:{}'.format(precision[0] if len(precision) != 0 else precision))
 
         # 计算ap
         average_precisions[class_id] = voc_ap(recall, precision, use_07_metric=use_07_metric)
