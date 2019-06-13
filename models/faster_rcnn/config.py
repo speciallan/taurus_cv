@@ -29,11 +29,14 @@ class Config(object):
     # CNN的架构
     BACKBONE = 'resnet50'
 
-    # 用于空洞卷积（目前没用）
-    # BACKBONE_STRIDES = [4, 8, 16, 32, 64]
+    # FPN
+    # TOP_DOWN_PYRAMID_SIZE = 256
 
     # 用于FPN（目前没用）
     FPN_CLF_FC_SIZE = 1024
+
+    # FPN
+    # BACKBONE_STRIDES = [4, 8, 16, 32, 64]
 
     # RPN分类数量（前景）
     NUM_CLASSES = 1 + 1
@@ -46,6 +49,7 @@ class Config(object):
     RPN_ANCHOR_SCALES = [1, 2 ** 1, 2 ** 2]
     RPN_ANCHOR_RATIOS = [0.5, 1, 2]
     RPN_ANCHOR_NUM = len(RPN_ANCHOR_SCALES) * len(RPN_ANCHOR_RATIOS)
+    # RPN_ANCHOR_STRIDE = 1
 
     # 不同数据集这个阈值不同
     RPN_SCORE_THRESHOLD = 0.1
@@ -56,6 +60,9 @@ class Config(object):
 
     # 每张图像训练anchors个数
     RPN_TRAIN_ANCHORS_PER_IMAGE = 256
+
+    RPN_POSITIVE_THRESHOLD=0.2
+    RPN_NEGATIVE_THRESHOLD=0.2
 
     # 训练和预测阶段NMS后保留的ROIs数
     POST_NMS_ROIS_TRAIN = 2000

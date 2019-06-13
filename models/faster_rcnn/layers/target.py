@@ -108,7 +108,7 @@ def rpn_targets_graph(gt_boxes, gt_cls, anchors, rpn_train_anchors=None):
     anchors_iou_max = tf.reduce_max(iou, axis=0)
 
     # 正样本索引号（iou>0.7),
-    positive_anchor_indices_2 = tf.where(anchors_iou_max > 0.7, name='rpn_target_positive_indices')  # [:, 0]
+    positive_anchor_indices_2 = tf.where(anchors_iou_max > config.RPN_POSITIVE_THRESHOLD, name='rpn_target_positive_indices')  # [:, 0]
 
     # 找到正样本对应的GT boxes 索引
     anchors_iou_argmax = tf.argmax(iou, axis=0)  # 每个anchor最大iou对应的GT 索引 [n]
@@ -136,7 +136,7 @@ def rpn_targets_graph(gt_boxes, gt_cls, anchors, rpn_train_anchors=None):
     deltas = regress_target(positive_anchors, positive_gt_boxes)
 
     # 处理负样本
-    negative_indices = tf.where(anchors_iou_max < 0.3, name='rpn_target_negative_indices')  # [:, 0]
+    negative_indices = tf.where(anchors_iou_max < config.RPN_NEGATIVE_THRESHOLD, name='rpn_target_negative_indices')  # [:, 0]
 
     # 负样本,保证负样本不超过一半
     negative_num = tf.minimum(int(rpn_train_anchors * 0.5),

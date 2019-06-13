@@ -6,7 +6,7 @@
 Roi投影到特征图
 """
 
-from keras import layers
+from keras import layers, engine
 import tensorflow as tf
 
 
