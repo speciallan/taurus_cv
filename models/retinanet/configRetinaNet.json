@@ -1,0 +1,39 @@
+{
+  "train": {
+    "batch_size": 1,
+    "epochs": 10,
+    "base_lr": 1e-4,
+    "patience": 0,
+    "do_freeze_layers": true,
+    "freeze_layer_stop_name": "",
+    "train_val_split": 0.9,
+    "augmentation": false
+  },
+  "path": {
+    "pretrained_weights": "./h5/pretrained.h5",
+    "base_weights": "./h5/base_{}.h5",
+    "trained_weights": "./h5/result.h5",
+    "chkpnt_weights": "./h5/chkpnt_best_{val_loss:.4f}.h5",
+    "images": "../../data/VOCdevkit/dd/JPEGImages/",
+    "annotations": "../../data/VOCdevkit/dd/Annotations/",
+    "test_images": "../../data/VOCdevkit/dd/JPEGImages/",
+    "test_result": "../../data/VOCdevkit/dd/result/",
+    "log": "./logs/"
+  },
+  "model": {
+    "_COMMENTO_type": "模型选择: resnet50, resnet101, resnet152",
+    "type": "resnet50",
+    "model_image": false,
+    "classes": [
+      "bg", "1", "2", "3", "4", "5", "6"
+    ],
+    "img_min_size": 512,
+    "img_max_size": 512
+  },
+  "test": {
+    "_COMMENTO1": "保存需要保存annotations注释图像测试图像读取 <test_images>",
+    "_COMMENTO2": "在测试和保存_＜result＞／＜result＞测试图像和/ _ annotations numerandole从<start_index>",
+    "save_annotations": false,
+    "start_index": 1
+  }
+}
