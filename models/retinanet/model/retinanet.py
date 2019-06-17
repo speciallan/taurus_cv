@@ -28,8 +28,11 @@ def default_classification_model(num_classes,
         'padding': 'same',
     }
 
+    # 512x512x3 -> 7x7x256
     inputs = keras.layers.Input(shape=(None, None, pyramid_feature_size))
     outputs = inputs
+
+    # 做4次卷积
     for i in range(4):
         outputs = keras.layers.Conv2D(
             filters=classification_feature_size,
@@ -40,6 +43,7 @@ def default_classification_model(num_classes,
             **options
         )(outputs)
 
+    # 分类branch
     outputs = keras.layers.Conv2D(
         filters=num_classes * num_anchors,
         kernel_initializer=keras.initializers.zeros(),
@@ -48,7 +52,7 @@ def default_classification_model(num_classes,
         **options
     )(outputs)
 
-    # esegue un reshape dell'output ed applica una sigmoid
+    # todo softmax
     outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape')(outputs)
     outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
 
@@ -135,6 +139,7 @@ def __build_model_pyramid(name, model, features):
 
 
 def __build_pyramid(models, features):
+    # n,m是reg和cls的name和model
     return [__build_model_pyramid(n, m, features) for n, m in models]
 
 
@@ -165,10 +170,13 @@ def retinanet(
 
     C3, C4, C5 = backbone_outputs
 
-    # preparo la piramide degli estrattori di features
+    # 特征提取 P3-P7
     features = create_pyramid_features(C3, C4, C5)
 
+    # FPN 5层 x (cls+reg) = 10 branch / submodels是一层 得到concat到一起的output
     pyramid = __build_pyramid(submodels, features)
+
+    # FPN 5层 anchors 得到concat到一起的anchors
     anchors = __build_anchors(anchor_parameters, features)
 
     return keras.models.Model(inputs=inputs, outputs=[anchors] + pyramid, name=name)

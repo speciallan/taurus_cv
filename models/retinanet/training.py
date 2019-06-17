@@ -10,16 +10,16 @@ from model.loss import getLoss
 from model.optimizer import get_optimizer
 from model.resnet import resnet_retinanet
 
-# leggo la configurazione
+# 获取配置
 config = Config('configRetinaNet.json')
 
-# creazione del modello
+# 如果使用resnet
 if config.type.startswith('resnet'):
     model, bodyLayers = resnet_retinanet(len(config.classes), backbone=config.type, weights='imagenet', nms=True)
 else:
     model = None
     bodyLayers = None
-    print("Tipo modello non riconosciuto ({})".format(config.type))
+    print("不存在相关网络({})".format(config.type))
     exit(1)
 
 print("backend: ", config.type)

@@ -55,9 +55,9 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, weights='ima
     elif backbone == 'resnet152':
         resnet = keras_resnet.models.ResNet152(inputs, include_top=False, freeze_bn=True)
     else:
-        raise ValueError("Il backbone '{}' non è riconosciuto.".format(backbone))
+        raise ValueError("backbone不存在".format(backbone))
 
-    # create the full model
+    # 生成完整模型
     model = retinanet_bbox(inputs=inputs, num_classes=num_classes, backbone_outputs=resnet.outputs[1:], **kwargs)
 
     # optionally load weights
