@@ -14,10 +14,10 @@
     "base_weights": "./h5/base_{}.h5",
     "trained_weights": "./h5/result.h5",
     "chkpnt_weights": "./h5/chkpnt_best_{val_loss:.4f}.h5",
-    "images": "../../data/VOCdevkit/dd/JPEGImages/",
-    "annotations": "../../data/VOCdevkit/dd/Annotations/",
-    "test_images": "../../data/VOCdevkit/dd/JPEGImages/",
-    "test_result": "../../data/VOCdevkit/dd/result/",
+    "images": "../../../../data/VOCdevkit/gangdaiyin/JPEGImages/",
+    "annotations": "../../../../data/VOCdevkit/gangdaiyin/Annotations/",
+    "test_images": "../../../../data/VOCdevkit/gangdaiyin/JPEGImages/",
+    "test_result": "../../../../data/VOCdevkit/gangdaiyin/results/",
     "log": "./logs/"
   },
   "model": {
@@ -25,7 +25,7 @@
     "type": "resnet50",
     "model_image": false,
     "classes": [
-      "bg", "1", "2", "3", "4", "5", "6"
+      "1", "2", "3", "4", "5", "6"
     ],
     "img_min_size": 512,
     "img_max_size": 512

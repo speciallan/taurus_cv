@@ -51,6 +51,7 @@ def anchors_for_shape(image_shape,
                       sizes=None):
     if pyramid_levels is None:
         pyramid_levels = [3, 4, 5, 6, 7]
+        # pyramid_levels = [2,3, 4, 5, 6]
     if strides is None:
         strides = [2 ** x for x in pyramid_levels]
     if sizes is None:

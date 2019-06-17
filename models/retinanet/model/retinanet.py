@@ -95,12 +95,19 @@ def __create_pyramid_features(C3, C4, C5, feature_size=256):
     P3 = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='C3_reduced')(C3)
     P3 = keras.layers.Add(name='P3_merged')([P4_upsampled, P3])
     P3 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=1, padding='same', name='P3')(P3)
+    # P3_upsampled = UpsampleLike(name='P3_upsampled')([P3, C2])
+
+    # P2 = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='C2_reduced')(C2)
+    # P2 = keras.layers.Add(name='P2_merged')([P3_upsampled, P2])
+    # P2 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=1, padding='same', name='P2')(P2)
 
     P6 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=2, padding='same', name='P6')(C5)
 
     P7 = keras.layers.Activation('relu', name='C6_relu')(P6)
     P7 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=2, padding='same', name='P7')(P7)
 
+    # 修改这里需要修改anchor的54行
+    # return P2, P3, P4, P5, P6
     return P3, P4, P5, P6, P7
 
 
@@ -118,6 +125,8 @@ class AnchorParameters:
 AnchorParameters.default = AnchorParameters(
     sizes=[32, 64, 128, 256, 512],
     strides=[8, 16, 32, 64, 128],
+    # sizes=[16, 32, 64, 128, 256],
+    # strides=[4, 8, 16, 32, 64],
     ratios=np.array([0.5, 1, 2], keras.backend.floatx()),
     scales=np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)], keras.backend.floatx()),
 )
@@ -163,10 +172,11 @@ def retinanet(
     if submodels is None:
         submodels = default_submodels(num_classes, anchor_parameters)
 
-    C3, C4, C5 = backbone_outputs
+    # 修改resnet 59行
+    c3, c4, c5 = backbone_outputs
 
     # preparo la piramide degli estrattori di features
-    features = create_pyramid_features(C3, C4, C5)
+    features = create_pyramid_features(c3, c4, c5)
 
     pyramid = __build_pyramid(submodels, features)
     anchors = __build_anchors(anchor_parameters, features)
