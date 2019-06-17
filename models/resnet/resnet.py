@@ -248,6 +248,7 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
     x = layers.Conv2D(64, (7, 7), strides=(2, 2), padding='valid', name='conv1')(x)
     x = layers.BatchNormalization(axis=bn_axis, name='bn_conv1')(x)
     x = layers.Activation('relu')(x)
+    c1 = x
 
     # 池化
     x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
@@ -300,6 +301,9 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
     P5 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p5")(P5)
 
     P6 = layers.MaxPooling2D(pool_size=(1, 1), strides=2, name="fpn_p6")(P5)
+
+    return Model(input, [c1,c2,c3,c4,c5], name='resnet50')
+    return [c1, c2, c3, c4, c5]
 
     if is_extractor:
         return [P2, P3, P4, P5, P6]

@@ -22,7 +22,7 @@ config = Config('configRetinaNet.json')
 # se non ci sono pesi specifici, uso i pesi base e le classi base
 wname = 'BASE'
 wpath = config.base_weights_path
-classes = ['bg', '1', '2', '3', '4', '5', '6']
+classes = ['1', '2', '3', '4', '5', '6']
 
 # se invece ci sono pesi specifici, uso questi pesi e le classi per cui sono stati trovati
 if os.path.isfile(config.trained_weights_path):
@@ -79,7 +79,7 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
         scores = detections[0, :, 4:]
 
         # filtra quelli con punteggio > 0.2
-        indices = np.where(detections[0, :, 4:] >= 0.2)
+        indices = np.where(detections[0, :, 4:] >= 0.3)
 
         # seleziona i punteggi che passano il filtro
         scores = scores[indices]

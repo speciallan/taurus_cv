@@ -1,6 +1,9 @@
+import sys
 import keras
 import keras_resnet
 import keras_resnet.models
+
+sys.path.append('../../..')
 
 from model.retinanet import custom_objects, retinanet_bbox
 # from keras.applications import imagenet_utils
@@ -50,6 +53,11 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, weights='ima
     # create the resnet backbone
     if backbone == 'resnet50':
         resnet = keras_resnet.models.ResNet50(inputs, include_top=False, freeze_bn=True)
+        # from taurus_cv.models.resnet.resnet import resnet50_fpn
+        # resnet = resnet50_fpn(inputs)
+        # resnet.summary()
+        # print(resnet.outputs)
+        # exit()
     elif backbone == 'resnet101':
         resnet = keras_resnet.models.ResNet101(inputs, include_top=False, freeze_bn=True)
     elif backbone == 'resnet152':
