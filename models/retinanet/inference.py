@@ -22,7 +22,7 @@ config = Config('configRetinaNet.json')
 # se non ci sono pesi specifici, uso i pesi base e le classi base
 wname = 'BASE'
 wpath = config.base_weights_path
-classes = ['1', '2', '3', '4', '5', '6']
+classes = ['0', '1', '2', '3', '4', '5', '6']
 
 # se invece ci sono pesi specifici, uso questi pesi e le classi per cui sono stati trovati
 if os.path.isfile(config.trained_weights_path):

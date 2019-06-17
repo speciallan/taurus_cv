@@ -2,8 +2,8 @@
   "train": {
     "batch_size": 1,
     "epochs": 10,
-    "base_lr": 1e-4,
-    "patience": 0,
+    "base_lr": 1e-3,
+    "patience": 2,
     "do_freeze_layers": true,
     "freeze_layer_stop_name": "",
     "train_val_split": 0.9,
@@ -25,7 +25,7 @@
     "type": "resnet50",
     "model_image": false,
     "classes": [
-      "1", "2", "3", "4", "5", "6"
+      "0", "1", "2", "3", "4", "5", "6"
     ],
     "img_min_size": 512,
     "img_max_size": 512
