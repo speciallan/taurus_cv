@@ -7,10 +7,8 @@ from config import Config
 from model.image import preprocess_image, resize_image
 from model.resnet import resnet_retinanet
 
-# leggo la configurazione
 config = Config('configRetinaNet.json')
 
-# se non ci sono pesi specifici, uso i pesi base e le classi base
 wname = 'BASE'
 wpath = config.base_weights_path
 classes = ['person',

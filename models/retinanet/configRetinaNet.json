@@ -2,11 +2,11 @@
   "train": {
     "batch_size": 1,
     "epochs": 10,
-    "base_lr": 1e-3,
-    "patience": 2,
+    "base_lr": 1e-4,
+    "patience": 0,
     "do_freeze_layers": true,
     "freeze_layer_stop_name": "",
-    "train_val_split": 0.9,
+    "train_val_split": 0.8,
     "augmentation": false
   },
   "path": {
@@ -14,10 +14,10 @@
     "base_weights": "./h5/base_{}.h5",
     "trained_weights": "./h5/result.h5",
     "chkpnt_weights": "./h5/chkpnt_best_{val_loss:.4f}.h5",
-    "images": "../../../../data/VOCdevkit/gangdaiyin/JPEGImages/",
-    "annotations": "../../../../data/VOCdevkit/gangdaiyin/Annotations/",
-    "test_images": "../../../../data/VOCdevkit/gangdaiyin/JPEGImages/",
-    "test_result": "../../../../data/VOCdevkit/gangdaiyin/results/",
+    "images": "../../../../data/VOCdevkit/dd/JPEGImages/",
+    "annotations": "../../../../data/VOCdevkit/dd/Annotations/",
+    "test_images": "../../../../data/VOCdevkit/dd/JPEGImages/",
+    "test_result": "../../../../data/VOCdevkit/dd/results/",
     "log": "./logs/"
   },
   "model": {

@@ -66,7 +66,7 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, weights='ima
         raise ValueError("backbone不存在".format(backbone))
 
     # 生成完整模型
-    model = retinanet_bbox(inputs=inputs, num_classes=num_classes, backbone_outputs=resnet.outputs[1:], **kwargs)
+    model = retinanet_bbox(inputs=inputs, num_classes=num_classes, backbone_outputs=resnet.outputs[0:], **kwargs)
 
     # optionally load weights
     if weights_path:

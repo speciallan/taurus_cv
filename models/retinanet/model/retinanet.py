@@ -28,11 +28,8 @@ def default_classification_model(num_classes,
         'padding': 'same',
     }
 
-    # 512x512x3 -> 7x7x256
     inputs = keras.layers.Input(shape=(None, None, pyramid_feature_size))
     outputs = inputs
-
-    # 做4次卷积
     for i in range(4):
         outputs = keras.layers.Conv2D(
             filters=classification_feature_size,
@@ -43,7 +40,6 @@ def default_classification_model(num_classes,
             **options
         )(outputs)
 
-    # 分类branch
     outputs = keras.layers.Conv2D(
         filters=num_classes * num_anchors,
         kernel_initializer=keras.initializers.zeros(),
@@ -52,7 +48,7 @@ def default_classification_model(num_classes,
         **options
     )(outputs)
 
-    # todo softmax
+    # esegue un reshape dell'output ed applica una sigmoid
     outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape')(outputs)
     outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
 
@@ -87,7 +83,7 @@ def default_regression_model(num_anchors,
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
 
 
-def __create_pyramid_features(C3, C4, C5, feature_size=256):
+def __create_pyramid_features(C2, C3, C4, C5, feature_size=256):
     P5 = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='P5')(C5)
     P5_upsampled = UpsampleLike(name='P5_upsampled')([P5, C4])
 
@@ -99,20 +95,18 @@ def __create_pyramid_features(C3, C4, C5, feature_size=256):
     P3 = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='C3_reduced')(C3)
     P3 = keras.layers.Add(name='P3_merged')([P4_upsampled, P3])
     P3 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=1, padding='same', name='P3')(P3)
-    # P3_upsampled = UpsampleLike(name='P3_upsampled')([P3, C2])
 
-    # P2 = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='C2_reduced')(C2)
-    # P2 = keras.layers.Add(name='P2_merged')([P3_upsampled, P2])
-    # P2 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=1, padding='same', name='P2')(P2)
+    P3_upsampled = UpsampleLike(name='P3_upsampled')([P3, C2])
+    P2 = keras.layers.Conv2D(feature_size, kernel_size=1, strides=1, padding='same', name='C2_reduced')(C2)
+    P2 = keras.layers.Add(name='P2_merged')([P3_upsampled, P2])
+    P2 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=1, padding='same', name='P2')(P2)
 
     P6 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=2, padding='same', name='P6')(C5)
 
     P7 = keras.layers.Activation('relu', name='C6_relu')(P6)
     P7 = keras.layers.Conv2D(feature_size, kernel_size=3, strides=2, padding='same', name='P7')(P7)
 
-    # 修改这里需要修改anchor的54行
-    # return P2, P3, P4, P5, P6
-    return P3, P4, P5, P6, P7
+    return P2, P3, P4, P5, P6
 
 
 class AnchorParameters:
@@ -127,12 +121,12 @@ class AnchorParameters:
 
 
 AnchorParameters.default = AnchorParameters(
-    sizes=[32, 64, 128, 256, 512],
-    strides=[8, 16, 32, 64, 128],
-    # sizes=[16, 32, 64, 128, 256],
-    # strides=[4, 8, 16, 32, 64],
+    # sizes=[32, 64, 128, 256, 512],
+    # strides=[8, 16, 32, 64, 128],
+    sizes=[16, 32, 64, 128, 256],
+    strides=[4, 8, 16, 32, 64],
     ratios=np.array([0.5, 1, 2], keras.backend.floatx()),
-    scales=np.array([0.5, 1, 2], keras.backend.floatx()),
+    scales=np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)], keras.backend.floatx()),
 )
 
 
@@ -148,7 +142,6 @@ def __build_model_pyramid(name, model, features):
 
 
 def __build_pyramid(models, features):
-    # n,m是reg和cls的name和model
     return [__build_model_pyramid(n, m, features) for n, m in models]
 
 
@@ -177,16 +170,14 @@ def retinanet(
     if submodels is None:
         submodels = default_submodels(num_classes, anchor_parameters)
 
-    # 修改resnet 59行
-    c3, c4, c5 = backbone_outputs
+    C2, C3, C4, C5 = backbone_outputs
 
-    # 特征提取 P3-P7
-    features = create_pyramid_features(c3, c4, c5)
+    # preparo la piramide degli estrattori di features
+    features = create_pyramid_features(C2, C3, C4, C5)
+    # print(features)
+    # exit()
 
-    # FPN 5层 x (cls+reg) = 10 branch / submodels是一层 得到concat到一起的output
     pyramid = __build_pyramid(submodels, features)
-
-    # FPN 5层 anchors 得到concat到一起的anchors
     anchors = __build_anchors(anchor_parameters, features)
 
     return keras.models.Model(inputs=inputs, outputs=[anchors] + pyramid, name=name)

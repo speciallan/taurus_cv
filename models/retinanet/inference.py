@@ -79,7 +79,7 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
         scores = detections[0, :, 4:]
 
         # filtra quelli con punteggio > 0.2
-        indices = np.where(detections[0, :, 4:] >= 0.3)
+        indices = np.where(detections[0, :, 4:] >= 0.25)
 
         # seleziona i punteggi che passano il filtro
         scores = scores[indices]
@@ -127,8 +127,11 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
                     ymax = box[3]
                     color = colors[i % len(colors)]
                     label = '{}: {:.2f}'.format(classes[image_predicted_labels[i]], image_scores[i][0])
-                    current_axis.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, color=color, fill=False, linewidth=2))
-                    current_axis.text(xmin, ymin, label, size='x-large', color='white', bbox={'facecolor': color, 'alpha': 1.0})
+                    current_axis.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, color=color, fill=False, linewidth=1))
+                    # current_axis.text(xmin, ymin, label, size='1', color='white', bbox={'facecolor': color, 'alpha': 1.0})
+                    # current_axis.text(xmin, ymin, classes[image_predicted_labels[i]], size='1', color='white')
+                    current_axis.text(xmin, ymin-1, '{} {:.2f}'.format(classes[image_predicted_labels[i]], image_scores[i][0]), size='10', color=color)
+
             plt.savefig(os.path.join(config.test_result_path, imgf))
             plt.close()
 

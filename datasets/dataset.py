@@ -107,7 +107,8 @@ class VocDetectionDataset(VocDataset):
                 for bbox in img_info['bboxes']:
                     y1, x1, y2, x2 = bbox['y1'], bbox['x1'], bbox['y2'], bbox['x2']
                     boxes.append([y1, x1, y2, x2])
-                    labels.append(bbox['class_id'])
+                    # labels.append(bbox['class_id'])
+                    labels.append(bbox['class_name'])
 
             image_info['boxes'] = np.array(boxes)
             image_info['labels'] = np.array(labels)
