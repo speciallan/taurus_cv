@@ -34,5 +34,4 @@ class Config:
         self.test_save_annotations = config['test']['save_annotations']
         self.test_start_index = config['test']['start_index']
 
-        # post correzione
         self.base_weights_path = self.base_weights_path.format(self.type)

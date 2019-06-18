@@ -1,7 +1,5 @@
 import tensorflow
 
-# Wrapper al backend di Tensorflow
-
 
 def top_k(*args, **kwargs):
     return tensorflow.nn.top_k(*args, **kwargs)

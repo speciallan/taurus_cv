@@ -1,13 +1,15 @@
 import keras
 import numpy as np
 
-from model.anchors import generate_anchors
-from model.common import shift, bbox_transform_inv
-from model.tensorflow_backend import top_k, non_max_suppression, resize_images
+from taurus_cv.models.retinanet.model.anchors import generate_anchors
+from taurus_cv.models.retinanet.model.common import shift, bbox_transform_inv
+from taurus_cv.models.retinanet.model.tensorflow_backend import top_k, non_max_suppression, resize_images
 
 
 class Anchors(keras.layers.Layer):
+
     def __init__(self, size, stride, ratios=None, scales=None, *args, **kwargs):
+
         self.size = size
         self.stride = stride
         self.ratios = ratios
@@ -32,10 +34,10 @@ class Anchors(keras.layers.Layer):
         super(Anchors, self).__init__(*args, **kwargs)
 
     def call(self, inputs, **kwargs):
+
         features = inputs
         features_shape = keras.backend.shape(features)[:3]
 
-        # genera le proposte dai delta dei box e dagli anchor shiftati
         anchorsShift = shift(features_shape[1:3], self.stride, self.anchors)
         anchors = keras.backend.tile(keras.backend.expand_dims(anchorsShift, axis=0), (features_shape[0], 1, 1))
 
@@ -61,6 +63,7 @@ class Anchors(keras.layers.Layer):
 
 
 class NonMaximumSuppression(keras.layers.Layer):
+
     def __init__(self, nms_threshold=0.4, top_k=None, max_boxes=300, *args, **kwargs):
         self.nms_threshold = nms_threshold
         self.top_k = top_k
@@ -76,7 +79,6 @@ class NonMaximumSuppression(keras.layers.Layer):
 
         scores = keras.backend.max(classification, axis=1)
 
-        # selezionare i migliori anchor, teoricamente migliora la velocità con un piccolo costo
         if self.top_k:
             scores, indices = top_k(scores, self.top_k, sorted=False)
             boxes = keras.backend.gather(boxes, indices)
@@ -122,12 +124,12 @@ class RegressBoxes(keras.layers.Layer):
         if isinstance(mean, (list, tuple)):
             mean = np.array(mean)
         elif not isinstance(mean, np.ndarray):
-            raise ValueError('La media deve essere un np.ndarray, una lista o una tupla. Ricevuto: {}'.format(type(mean)))
+            raise ValueError('平均值必须是np数组: {}'.format(type(mean)))
 
         if isinstance(std, (list, tuple)):
             std = np.array(std)
         elif not isinstance(std, np.ndarray):
-            raise ValueError('La deviazione standard deve essere un np.ndarray, una lista o una tupla. Ricevuto: {}'.format(type(std)))
+            raise ValueError('标准差必须是np数组:{}'.format(type(std)))
 
         self.mean = mean
         self.std = std

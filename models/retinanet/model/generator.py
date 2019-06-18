@@ -1,14 +1,26 @@
 import os
 import random
-
 import time
 
-from model.pascal_voc import PascalVocGenerator
-
-from model.transform import random_transform_generator
+from taurus_cv.models.retinanet.model.pascal_voc import PascalVocGenerator
+from taurus_cv.models.retinanet.model.transform import random_transform_generator
 
 
 def get_generators(images_path, annotations_path, train_val_split, batch_size, classes, img_min_size, img_max_size, shuffle=True, debug=False, transform=True):
+    """
+    获取生成器
+    :param images_path:
+    :param annotations_path:
+    :param train_val_split:
+    :param batch_size:
+    :param classes:
+    :param img_min_size:
+    :param img_max_size:
+    :param shuffle:
+    :param debug:
+    :param transform:
+    :return:
+    """
     if transform:
         transform_generator = random_transform_generator(min_rotation=-0.1,
                                                          max_rotation=0.1,
@@ -23,10 +35,8 @@ def get_generators(images_path, annotations_path, train_val_split, batch_size, c
     else:
         transform_generator = None
 
-    # ottengo l'elenco di tutte le annotations
     annotation_files = [os.path.splitext(f)[0] for f in os.listdir(annotations_path) if os.path.isfile(os.path.join(annotations_path, f))]
 
-    # mescola l'ordine delle righe (casuale, ma ripetibile)
     if shuffle:
         random.seed = 19081974
         random.shuffle(annotation_files)
@@ -36,7 +46,7 @@ def get_generators(images_path, annotations_path, train_val_split, batch_size, c
         val_ids = annotation_files[max_id:]
     else:
         val_ids = None
-    # resetto il seed random con un numero dipendente dall'istante attuale in millisecondi
+
     random.seed = int(round(time.time() * 1000))
 
     train_generator = PascalVocGenerator(

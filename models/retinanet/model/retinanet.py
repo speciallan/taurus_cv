@@ -1,9 +1,9 @@
 import keras
 import numpy as np
 
-from model.initializers import PriorProbability
-from model.loss import smooth_l1, focal
-from model.misc import UpsampleLike, RegressBoxes, NonMaximumSuppression, Anchors
+from taurus_cv.models.retinanet.model.initializers import PriorProbability
+from taurus_cv.models.retinanet.model.loss import smooth_l1, focal
+from taurus_cv.models.retinanet.model.misc import UpsampleLike, RegressBoxes, NonMaximumSuppression, Anchors
 
 custom_objects = {
     'UpsampleLike': UpsampleLike,
@@ -48,7 +48,6 @@ def default_classification_model(num_classes,
         **options
     )(outputs)
 
-    # esegue un reshape dell'output ed applica una sigmoid
     outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape')(outputs)
     outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
 
@@ -123,6 +122,7 @@ class AnchorParameters:
 AnchorParameters.default = AnchorParameters(
     # sizes=[32, 64, 128, 256, 512],
     # strides=[8, 16, 32, 64, 128],
+    # sizes是步长的4倍
     sizes=[16, 32, 64, 128, 256],
     strides=[4, 8, 16, 32, 64],
     ratios=np.array([0.5, 1, 2], keras.backend.floatx()),
@@ -172,7 +172,6 @@ def retinanet(
 
     C2, C3, C4, C5 = backbone_outputs
 
-    # preparo la piramide degli estrattori di features
     features = create_pyramid_features(C2, C3, C4, C5)
     # print(features)
     # exit()
@@ -186,18 +185,14 @@ def retinanet(
 def retinanet_bbox(inputs, num_classes, backbone_outputs, nms=True, name='retinanet-bbox', *args, **kwargs):
     model = retinanet(inputs=inputs, backbone_outputs=backbone_outputs, num_classes=num_classes, *args, **kwargs)
 
-    # anchors, regression e classification devono essere i primi valori dell'output
     anchors = model.outputs[0]
     regression = model.outputs[1]
     classification = model.outputs[2]
 
-    # applica la regressione predetta agli anchor
     boxes = RegressBoxes(name='boxes')([anchors, regression])
     detections = keras.layers.Concatenate(axis=2)([boxes, classification] + model.outputs[3:])
 
-    # se serve, applica una "non-maximum suppressione"
     if nms:
         detections = NonMaximumSuppression(name='nms')([boxes, classification, detections])
 
-    # costruisce il modello
     return keras.models.Model(inputs=inputs, outputs=model.outputs[1:] + [detections], name=name)

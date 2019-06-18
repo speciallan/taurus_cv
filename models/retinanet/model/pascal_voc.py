@@ -11,9 +11,9 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from six import raise_from
 
-from model.anchors import anchor_targets_bbox, bbox_transform
-from model.image import read_image_bgr, TransformParameters, apply_transform, adjust_transform_for_image, resize_image, preprocess_image
-from model.transform import transform_aabb
+from taurus_cv.models.retinanet.model.anchors import anchor_targets_bbox, bbox_transform
+from taurus_cv.models.retinanet.model.image import read_image_bgr, TransformParameters, apply_transform, adjust_transform_for_image, resize_image, preprocess_image
+from taurus_cv.models.retinanet.model.transform import transform_aabb
 
 try:
     import xml.etree.cElementTree as ET
@@ -22,6 +22,7 @@ except ImportError:
 
 
 def save_annotations(filepath, filename, image, boxes):
+
     cv2.imwrite(os.path.join(os.path.join(filepath, "images"), filename + ".jpg"), image)
     root = ET.Element("annotation")
     ET.SubElement(root, "folder").text = "images"
@@ -53,12 +54,12 @@ def _find_node(parent, name, debug_name=None, parse=None):
 
     result = parent.find(name)
     if result is None:
-        raise ValueError('Element non trovato \'{}\''.format(debug_name))
+        raise ValueError('异常 \'{}\''.format(debug_name))
     if parse is not None:
         try:
             return parse(result.text)
         except ValueError as e:
-            raise_from(ValueError('Valore non ammissibile per \'{}\': {}'.format(debug_name, e)), None)
+            raise_from(ValueError('异常 \'{}\': {}'.format(debug_name, e)), None)
     return result
 
 
@@ -69,7 +70,7 @@ class Generator(object):
             image_max_side,
             transform_generator=None,
             batch_size=1,
-            group_method='ratio',  # può valere 'none', 'random', 'ratio'
+            group_method='ratio',  # 'none', 'random', 'ratio'
             shuffle_groups=True,
             transform_parameters=None,
             debug=False
@@ -92,36 +93,36 @@ class Generator(object):
         self.group_images()
 
     def size(self):
-        raise NotImplementedError('Metodo "size" non implementato')
+        raise NotImplementedError('方法 "size" 没实现')
 
     def num_classes(self):
-        raise NotImplementedError('Metodo "num_classes" non implementato')
+        raise NotImplementedError('方法 "num_classes" 没实现')
 
     def name_to_label(self, name):
-        raise NotImplementedError('Metodo "name_to_label" non implementato')
+        raise NotImplementedError('方法 "name_to_label" 没实现')
 
     def label_to_name(self, label):
-        raise NotImplementedError('Metodo "label_to_name" non implementato')
+        raise NotImplementedError('方法 "label_to_name" 没实现')
 
     def name_from_index(self, index):
-        raise NotImplementedError('Metodo "name_from_index" non implementato')
+        raise NotImplementedError('方法 "name_from_index" 没实现')
 
     def image_aspect_ratio(self, image_index):
-        raise NotImplementedError('Metodo "image_aspect_ratio" non implementato')
+        raise NotImplementedError('方法 "image_aspect_ratio" 没实现')
 
     def load_image(self, image_index):
-        raise NotImplementedError('Metodo "load_image" non implementato')
+        raise NotImplementedError('方法 "load_image" 没实现')
 
     def load_annotations(self, image_index):
-        raise NotImplementedError('Metodo "load_annotations" non implementato')
+        raise NotImplementedError('方法 "load_annotations" 没实现')
 
     def load_annotations_group(self, group):
         return [self.load_annotations(image_index) for image_index in group]
 
     def filter_annotations(self, image_group, annotations_group, group):
-        # verifica le annotazioni
+
         for index, (image, annotations) in enumerate(zip(image_group, annotations_group)):
-            assert (isinstance(annotations, np.ndarray)), '\'load_annotations\' dovrebbe ritornare una lista di numpy array, invece ricevo: {}' \
+            assert (isinstance(annotations, np.ndarray)), '\'load_annotations\' nparray : {}' \
                 .format(type(annotations))
 
             annotations[:, 0] = np.maximum(0, annotations[:, 0])
@@ -141,7 +142,7 @@ class Generator(object):
 
             # delete invalid indices
             if len(invalid_indices):
-                warnings.warn('Immagine "{}" con id {} (shape {}) contiene dei box invalidi: {}.'.format(
+                warnings.warn('图像 "{}" id {} (shape {}) : {}.'.format(
                     self.name_from_index(group[index]),
                     group[index],
                     image.shape,
@@ -156,15 +157,12 @@ class Generator(object):
 
     def random_transform_group_entry(self, image, annotations):
 
-        # trasforma in modo random sia le immagini che le annotazioni
         if self.transform_generator:
-            # preparo le trasformazioni random
+
             transform = adjust_transform_for_image(next(self.transform_generator), image, self.transform_parameters.relative_translation)
 
-            # applico alla immagine
             image = apply_transform(transform, image, self.transform_parameters)
 
-            # applico alle annotazioni
             annotations = annotations.copy()
             for index in range(annotations.shape[0]):
                 annotations[index, :4] = transform_aabb(transform, annotations[index, :4])
@@ -194,19 +192,15 @@ class Generator(object):
 
     def preprocess_group_entry(self, image, annotations, index):
 
-        # preprocesso l'immagine
         image = self.preprocess_image(image)
 
         if self.debug:
             self.save_img_ann(image, annotations, '0PRE', index)
 
-        # trasformo in modo random sia le immagini che le annotazioni
         image, annotations = self.random_transform_group_entry(image, annotations)
 
-        # ridimensiono l'immagine
         image, image_scale = self.resize_image(image)
 
-        # applico la scala alle annotazioni
         annotations[:, :4] *= image_scale
 
         if self.debug:
@@ -216,7 +210,6 @@ class Generator(object):
 
     def preprocess_group(self, image_group, annotations_group):
         for index, (image, annotations) in enumerate(zip(image_group, annotations_group)):
-            # preprocessa un gruppo di immagini e annotazioni
             image, annotations = self.preprocess_group_entry(image, annotations, index)
 
             image_group[index] = image
@@ -225,24 +218,21 @@ class Generator(object):
         return image_group, annotations_group
 
     def group_images(self):
-        # determina l'ordine delle immagini
+
         order = list(range(self.size()))
         if self.group_method == 'random':
             random.shuffle(order)
         elif self.group_method == 'ratio':
             order.sort(key=lambda x: self.image_aspect_ratio(x))
 
-        # divide il tutto in gruppi (corrispondenti ai batch)
         self.groups = [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
 
     def compute_inputs(self, image_group):
-        # ottiene la massima dimensione delle immagini
+
         max_shape = tuple(max(image.shape[x] for image in image_group) for x in range(3))
 
-        # costruisce un vettore batch dove salvare le immagini
         image_batch = np.zeros((self.batch_size,) + max_shape, dtype=keras.backend.floatx())
 
-        # copia le immagini nel vettore batch
         for image_index, image in enumerate(image_group):
             image_batch[image_index, :image.shape[0], :image.shape[1], :image.shape[2]] = image
 
@@ -259,25 +249,22 @@ class Generator(object):
         return anchor_targets_bbox(image_shape, annotations, num_classes, mask_shape, negative_overlap, positive_overlap, **kwargs)
 
     def compute_targets(self, image_group, annotations_group):
-        # ottiene la massima dimensione delle immagini
+
         max_shape = tuple(max(image.shape[x] for image in image_group) for x in range(3))
 
-        # calcola label e target di regressione
         labels_group = [None] * self.batch_size
         regression_group = [None] * self.batch_size
         for index, (image, annotations) in enumerate(zip(image_group, annotations_group)):
-            # calcola i target di regressione
+
             labels_group[index], annotations, anchors = self.anchor_targets(max_shape, annotations, self.num_classes(), mask_shape=image.shape)
             regression_group[index] = bbox_transform(anchors, annotations)
 
-            # aggiunge gli stati degli anchor ai target di regressione
             anchor_states = np.max(labels_group[index], axis=1, keepdims=True)
             regression_group[index] = np.append(regression_group[index], anchor_states, axis=1)
 
         labels_batch = np.zeros((self.batch_size,) + labels_group[0].shape, dtype=keras.backend.floatx())
         regression_batch = np.zeros((self.batch_size,) + regression_group[0].shape, dtype=keras.backend.floatx())
 
-        # copia tutte le label e i valori di regressione al blob batch
         for index, (labels, regression) in enumerate(zip(labels_group, regression_group)):
             labels_batch[index, ...] = labels
             regression_batch[index, ...] = regression
@@ -285,20 +272,16 @@ class Generator(object):
         return [regression_batch, labels_batch]
 
     def compute_input_output(self, group):
-        # carica immagini e annotazioni
+
         image_group = self.load_image_group(group)
         annotations_group = self.load_annotations_group(group)
 
-        # verifica la validità delle annotazioni
         image_group, annotations_group = self.filter_annotations(image_group, annotations_group, group)
 
-        # esegue un preprocesso dull'intero gruppo
         image_group, annotations_group = self.preprocess_group(image_group, annotations_group)
 
-        # calcola il layer di input della rete
         inputs = self.compute_inputs(image_group)
 
-        # calcola il layer di output della rete
         targets = self.compute_targets(image_group, annotations_group)
 
         return inputs, targets
@@ -307,10 +290,9 @@ class Generator(object):
         return self.next()
 
     def next(self):
-        # avanza sul prossimo gruppo, usando il lock per essere thread-safe (in caso di multithreading)
+
         with self.lock:
             if self.group_index == 0 and self.shuffle_groups:
-                # mischia i gruppi all'inizio di una epoch
                 random.shuffle(self.groups)
             group = self.groups[self.group_index]
             self.group_index = (self.group_index + 1) % len(self.groups)

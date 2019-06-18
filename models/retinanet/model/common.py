@@ -1,9 +1,10 @@
 import keras.backend
 
-from model.tensorflow_backend import meshgrid
+from taurus_cv.models.retinanet.model.tensorflow_backend import meshgrid
 
 
 def bbox_transform_inv(boxes, deltas, mean=None, std=None):
+
     if mean is None:
         mean = [0, 0, 0, 0]
     if std is None:
@@ -35,7 +36,7 @@ def bbox_transform_inv(boxes, deltas, mean=None, std=None):
 
 
 def shift(shape, stride, anchors):
-    # Produce degli anchor shiftati in base allo shape della mappa e alla dimensione dello stride
+
     shift_x = (keras.backend.arange(0, shape[1], dtype=keras.backend.floatx()) + keras.backend.constant(0.5, dtype=keras.backend.floatx())) * stride
     shift_y = (keras.backend.arange(0, shape[0], dtype=keras.backend.floatx()) + keras.backend.constant(0.5, dtype=keras.backend.floatx())) * stride
 

@@ -5,7 +5,7 @@ import cv2
 import keras
 import numpy as np
 
-from model.transform import change_transform_origin
+from taurus_cv.models.retinanet.model.transform import change_transform_origin
 
 
 def read_image_rgb(path):
@@ -19,7 +19,7 @@ def read_image_bgr(path):
 
 
 def preprocess_image(x):
-    # se serve, converte da RGB a BGR (a meno che non sia già questa la situazione)
+
     x = x.astype(keras.backend.floatx())
     if keras.backend.image_data_format() == 'channels_first':
         if x.ndim == 3:
@@ -39,23 +39,21 @@ def preprocess_image(x):
 
 
 def adjust_transform_for_image(transform, image, relative_translation):
-    # corregge la trasformazione per una immagine
+
     height, width, channels = image.shape
 
     result = transform
 
-    # scala la traslazione con le dimensioni dell'immagine, se serve
     if relative_translation:
         result[0:2, 2] *= [width, height]
 
-    # muove l'origine della trasformazione nel centro dell'immagine
     result = change_transform_origin(transform, (0.5 * width, 0.5 * height))
 
     return result
 
 
 class TransformParameters:
-    # Questo oggetto contiene i parametri che determinano come applicare una trasformazione ad una immagine
+
     def __init__(
             self,
             fill_mode='nearest',
@@ -104,7 +102,7 @@ class TransformParameters:
 
 
 def apply_transform(matrix, image, params):
-    # Applica una trasformazione ad una immagine
+
     if params.channel_axis != 2:
         image = np.moveaxis(image, params.channel_axis, 2)
 
@@ -127,16 +125,13 @@ def resize_image(img, min_side, max_side):
 
     smallest_side = min(rows, cols)
 
-    # calcola la scala in base alla dimensione minore dell'immagine
+    # 计算表根据图像的大小
     scale = min_side / smallest_side
 
-    # verifica che la dimensione maggiore dell'immagine non superi "max_side"
-    # si potrebbe verificare con immagini dall'alto aspect ratio
     largest_side = max(rows, cols)
     if largest_side * scale > max_side:
         scale = max_side / largest_side
 
-    # ridimensione l'immagine usando la scala calcolata
     img = cv2.resize(img, None, fx=scale, fy=scale)
 
     return img, scale

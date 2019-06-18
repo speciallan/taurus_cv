@@ -5,9 +5,9 @@ import keras_resnet.models
 
 sys.path.append('../../..')
 
-from model.retinanet import custom_objects, retinanet_bbox
-# from keras.applications import imagenet_utils
+from taurus_cv.models.retinanet.model.retinanet import custom_objects, retinanet_bbox
 from keras.utils import get_file
+# from keras.applications import imagenet_utils
 # from keras.applications.imagenet_utils import imagenet_utils
 
 resnet_filename = 'ResNet-{}-model.keras.h5'
@@ -71,6 +71,6 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, weights='ima
     # optionally load weights
     if weights_path:
         model.load_weights(weights_path, by_name=True, skip_mismatch=skip_mismatch)
-        print("Caricati pesi BACKEND")
+        print("BACKEND")
 
     return model, resnet.layers

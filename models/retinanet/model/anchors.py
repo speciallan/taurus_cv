@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def anchor_targets_bbox(image_shape,
                         annotations,
                         num_classes,
@@ -10,31 +9,26 @@ def anchor_targets_bbox(image_shape,
                         **kwargs):
     anchors = anchors_for_shape(image_shape, **kwargs)
 
-    # label: 1 è positivo, 0 è negativo, -1 è ignora
+    # label: 1 positive, 0 negative, -1 ignore
     labels = np.ones((anchors.shape[0], num_classes)) * -1
 
     if annotations.shape[0]:
-        # ottiene gli indici dei ground truth con la massima sovrapposizione
+
         overlaps = compute_overlap(anchors, annotations[:, :4])
         argmax_overlaps_inds = np.argmax(overlaps, axis=1)
         max_overlaps = overlaps[np.arange(overlaps.shape[0]), argmax_overlaps_inds]
 
-        # assegna per prime le label del background in modo che le label positive possano poi oscurarle
         labels[max_overlaps < negative_overlap, :] = 0
 
-        # calcola i box dei target di regressione
         annotations = annotations[argmax_overlaps_inds]
 
-        # ottiene le label di primo piano che superano un certo threshold di IOU
         positive_indices = max_overlaps >= positive_overlap
         labels[positive_indices, :] = 0
         labels[positive_indices, annotations[positive_indices, 4].astype(int)] = 1
     else:
-        # se non ci sono annotazioni, allora è tutto considerato background
         labels[:] = 0
         annotations = np.zeros_like(anchors)
 
-    # ignora le annotazioni che finiscono fuori dall'immagine
     mask_shape = image_shape if mask_shape is None else mask_shape
     anchors_centers = np.vstack([(anchors[:, 0] + anchors[:, 2]) / 2, (anchors[:, 1] + anchors[:, 3]) / 2]).T
     indices = np.logical_or(anchors_centers[:, 0] >= mask_shape[1], anchors_centers[:, 1] >= mask_shape[0])
@@ -50,6 +44,7 @@ def anchors_for_shape(image_shape,
                       strides=None,
                       sizes=None):
     if pyramid_levels is None:
+        # 根据FPN使用的骨干网层数决定
         # pyramid_levels = [3, 4, 5, 6, 7]
         pyramid_levels = [2,3, 4, 5, 6]
     if strides is None:
@@ -61,12 +56,10 @@ def anchors_for_shape(image_shape,
     if scales is None:
         scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
 
-    # salta i primi due livelli
     image_shape = np.array(image_shape[:2])
     for i in range(pyramid_levels[0] - 1):
         image_shape = (image_shape + 1) // 2
 
-    # calcola gli anchor su tutti i livelli piramidali
     all_anchors = np.zeros((0, 4))
     for idx, p in enumerate(pyramid_levels):
         image_shape = (image_shape + 1) // 2
@@ -106,16 +99,14 @@ def generate_anchors(base_size=16, ratios=None, scales=None):
 
     num_anchors = len(ratios) * len(scales)
 
-    # inizializza gli output anchor
     anchors = np.zeros((num_anchors, 4))
 
-    # scala usando la base_size
+    # scales
     anchors[:, 2:] = base_size * np.tile(scales, (2, len(ratios))).T
 
-    # calcola le aree degli anchor
     areas = anchors[:, 2] * anchors[:, 3]
 
-    # corregge in base ai ratios
+    # ratios
     anchors[:, 2] = np.sqrt(areas / np.repeat(ratios, len(scales)))
     anchors[:, 3] = anchors[:, 2] * np.repeat(ratios, len(scales))
 
@@ -127,7 +118,7 @@ def generate_anchors(base_size=16, ratios=None, scales=None):
 
 
 def bbox_transform(anchors, gt_boxes, mean=None, std=None):
-    # calcola i bounding box dei target di regressione per una immagine
+
     if mean is None:
         mean = np.array([0, 0, 0, 0])
     if std is None:
@@ -136,12 +127,12 @@ def bbox_transform(anchors, gt_boxes, mean=None, std=None):
     if isinstance(mean, (list, tuple)):
         mean = np.array(mean)
     elif not isinstance(mean, np.ndarray):
-        raise ValueError('La media deve essereun np.ndarray, una lista o una tupla. Ricevuto: {}'.format(type(mean)))
+        raise ValueError('均值必须是np.ndarray: {}'.format(type(mean)))
 
     if isinstance(std, (list, tuple)):
         std = np.array(std)
     elif not isinstance(std, np.ndarray):
-        raise ValueError('La deviazione standard deve essere un np.ndarray, una lista o una tupla. Ricevuto: {}'.format(type(std)))
+        raise ValueError('标准偏差必须是一个列表或一个np.ndarray {}'.format(type(std)))
 
     anchor_widths = anchors[:, 2] - anchors[:, 0] + 1.0
     anchor_heights = anchors[:, 3] - anchors[:, 1] + 1.0
@@ -167,7 +158,7 @@ def bbox_transform(anchors, gt_boxes, mean=None, std=None):
 
 
 def compute_overlap(a, b):
-    # calcola la sovrapposizione
+
     area = (b[:, 2] - b[:, 0] + 1) * (b[:, 3] - b[:, 1] + 1)
 
     iw = np.minimum(np.expand_dims(a[:, 2], axis=1), b[:, 2]) - np.maximum(np.expand_dims(a[:, 0], 1), b[:, 0]) + 1

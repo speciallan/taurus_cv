@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author:Speciallan
+
+import sys
+import argparse
+sys.path.append('../../..')
+
 import os
 from math import ceil
 
@@ -45,13 +53,14 @@ if config.do_freeze_layers:
     print("freeze " + str(conta) + " layers")
     # model.summary()
 
+# 编译模型
 model.compile(loss=getLoss(), optimizer=get_optimizer(config.base_lr), metrics=['accuracy'])
 
 if config.model_image:
     plot_model(model, to_file='model_image.jpg')
 
 
-
+# 数据生成器
 train_generator, val_generator, n_train_samples, n_val_samples = get_generators(config.images_path,
                                                                                 config.annotations_path,
                                                                                 config.train_val_split,
@@ -62,7 +71,6 @@ train_generator, val_generator, n_train_samples, n_val_samples = get_generators(
                                                                                 transform=config.augmentation,
                                                                                 debug=False)
 
-# preparo i callback
 callbacks = get_callbacks(config)
 # print(next(train_generator))
 # exit()

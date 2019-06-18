@@ -5,6 +5,10 @@ import numpy as np
 
 
 class PriorProbability(keras.initializers.Initializer):
+    """
+    先验概率初始化
+    """
+
     def __init__(self, probability=0.01):
         self.probability = probability
 
@@ -14,7 +18,7 @@ class PriorProbability(keras.initializers.Initializer):
         }
 
     def __call__(self, shape, dtype=None):
-        # imposta il bias = -log((1 - p)/p) per il primo piano
+
         result = np.ones(shape, dtype=dtype) * -math.log((1 - self.probability) / self.probability)
 
         return result

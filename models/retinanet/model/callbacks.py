@@ -2,7 +2,9 @@ from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard, Ear
 
 
 def get_callbacks(config):
+
     callbacks = [
+
         ModelCheckpoint(config.chkpnt_weights_path,
                         monitor='val_loss',
                         verbose=1,
@@ -22,6 +24,7 @@ def get_callbacks(config):
                     write_images=True)]
 
     if config.patience > 0:
+
         callbacks.append(EarlyStopping(monitor='val_loss',
                                        min_delta=0.0001,
                                        patience=config.patience,

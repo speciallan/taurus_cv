@@ -1,10 +1,11 @@
 import keras
 
-from model import tensorflow_backend
-from model.tensorflow_backend import where, gather_nd
+from taurus_cv.models.retinanet.model import tensorflow_backend
+from taurus_cv.models.retinanet.model.tensorflow_backend import where, gather_nd
 
 
 def getLoss():
+
     return {
         'regression': smooth_l1(),
         'classification': focal()
@@ -12,7 +13,14 @@ def getLoss():
 
 
 def focal(alpha=0.25, gamma=2.0):
+    """
+    Focal Loss
+    :param alpha:
+    :param gamma:
+    :return:
+    """
     def _focal(y_true, y_pred):
+
         labels         = y_true
         classification = y_pred
 
@@ -41,6 +49,7 @@ def focal(alpha=0.25, gamma=2.0):
 
 
 def smooth_l1(sigma=3.0):
+
     sigma_squared = sigma ** 2
 
     def _smooth_l1(y_true, y_pred):

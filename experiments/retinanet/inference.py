@@ -1,3 +1,7 @@
+import sys
+import argparse
+sys.path.append('../../..')
+
 import matplotlib as mpl
 
 mpl.use('Agg')
@@ -19,11 +23,11 @@ wpath = config.base_weights_path
 classes = ['0', '1', '2', '3', '4', '5', '6']
 
 if os.path.isfile(config.trained_weights_path):
-    wname = "DEFINITIVI"
+    wname = "definitivi"
     wpath = config.trained_weights_path
     classes = config.classes
 if os.path.isfile(config.pretrained_weights_path):
-    wname = 'PRETRAINED'
+    wname = 'pretrained'
     wpath = config.pretrained_weights_path
     classes = config.classes
 
@@ -40,7 +44,7 @@ if os.path.isfile(wpath):
     model.load_weights(wpath, by_name=True, skip_mismatch=True)
     print("权重" + wname)
 else:
-    print("None")
+    print("权重None")
 
 start_index = config.test_start_index
 for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
@@ -117,4 +121,4 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
             plt.savefig(os.path.join(config.test_result_path, imgf))
             plt.close()
 
-        print("Elaborata immagine '" + imgf + "'")
+        print("生成图片 '" + imgf + "'")
