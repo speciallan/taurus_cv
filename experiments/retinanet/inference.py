@@ -7,6 +7,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 
 import os
+import time
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -15,6 +16,8 @@ from taurus_cv.models.retinanet.model.pascal_voc import save_annotations
 from taurus_cv.models.retinanet.model.image import read_image_bgr, preprocess_image, resize_image, read_image_rgb
 from taurus_cv.models.retinanet.model.resnet import resnet_retinanet
 from taurus_cv.models.retinanet.config import Config
+
+start_time = time.time()
 
 config = Config('configRetinaNet.json')
 
@@ -121,4 +124,5 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
             plt.savefig(os.path.join(config.test_result_path, imgf))
             plt.close()
 
-        print("生成图片 '" + imgf + "'")
+        print("生成图片 '" + imgf + "'" + ' time:{}'.format(time.time() - start_time))
+        start_time = time.time()
