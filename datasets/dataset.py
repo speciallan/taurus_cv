@@ -117,6 +117,10 @@ class VocDetectionDataset(VocDataset):
 
         return self
 
+    def get_all_data(self):
+
+        return [info for info in self.get_image_list()]
+
     def get_train_data(self):
 
         return [info for info in self.get_image_list() if info['type'] == self.TRAIN_LABEL]

@@ -46,12 +46,10 @@ start_index = config.test_start_index
 for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
     imgfp = os.path.join(config.test_images_path, imgf)
     if os.path.isfile(imgfp):
-
         try:
             img = read_image_bgr(imgfp)
         except:
             continue
-
         img = preprocess_image(img.copy())
         img, scale = resize_image(img, min_side=config.img_min_size, max_side=config.img_max_size)
 

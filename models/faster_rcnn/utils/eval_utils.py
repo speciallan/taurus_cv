@@ -46,6 +46,8 @@ def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0
         # 合并边框和得分
         cur_detections = np.concatenate([cur_boxes, np.expand_dims(cur_scores, axis=1)], axis=1)
 
+        # print(cur_detections, cur_predict_labels)
+        # exit()
         # 逐个类别处理
         for class_id in range(num_classes):
             all_detections[image_idx][class_id] = cur_detections[cur_predict_labels == class_id]
@@ -68,7 +70,8 @@ def get_annotations(image_info_list, num_classes):
     for image_idx in range(num_images):
         gt_boxes = image_info_list[image_idx]['boxes']  # 此图片的GT边框
         for class_id in range(num_classes):
-            indices = np.where(image_info_list[image_idx]['labels'] == class_id)
+            # [3,3,6,6] 获取class_id=6的索引[2,3], 通过[2,3]获取boxes
+            indices = np.where(image_info_list[image_idx]['labels'] == str(class_id))
             all_annotations[image_idx][class_id] = gt_boxes[indices]
 
     return all_annotations
@@ -135,10 +138,13 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
 
         # 逐个图像处理
         for image_id in range(num_images):
+            print(all_annotations[image_id])
+            exit()
             gt_boxes = all_annotations[image_id][class_id]  # (n,y1,x1,y2,x2)
             num_gt_boxes += gt_boxes.shape[0]  # gt个数
 
             detected_gt_boxes = []  # 已经检测匹配过的gt边框
+
 
             for detect_box in all_detections[image_id][class_id]:
                 scores = np.append(scores, detect_box[4])
