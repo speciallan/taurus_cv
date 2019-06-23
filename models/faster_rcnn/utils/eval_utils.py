@@ -8,6 +8,7 @@
 
 import numpy as np
 from taurus_cv.models.faster_rcnn.utils import np_utils
+from taurus_cv.utils.spe import spe
 
 
 def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0.05, max_boxes_num=100):
@@ -55,7 +56,7 @@ def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0
     return all_detections
 
 
-def get_annotations(image_info_list, num_classes):
+def get_annotations(image_info_list, num_classes, order=False):
     """
     获取所有的编著
     :param image_info_list: list of dict, 图像数据信息
@@ -69,6 +70,8 @@ def get_annotations(image_info_list, num_classes):
     all_annotations = [[None for j in range(num_classes)] for i in range(num_images)]  # (num_images,num_classes)
     for image_idx in range(num_images):
         gt_boxes = image_info_list[image_idx]['boxes']  # 此图片的GT边框
+        if order:
+            gt_boxes = gt_boxes[:,[1,0,3,2]]
         for class_id in range(num_classes):
             # [3,3,6,6] 获取class_id=6的索引[2,3], 通过[2,3]获取boxes
             indices = np.where(image_info_list[image_idx]['labels'] == str(class_id))
@@ -136,18 +139,21 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         scores = np.zeros((0,), dtype=np.float64)
         num_gt_boxes = 0.0
 
+        # 记录错误
+        wrong = []
+
         # 逐个图像处理
         for image_id in range(num_images):
-            print(all_annotations[image_id])
-            exit()
+
             gt_boxes = all_annotations[image_id][class_id]  # (n,y1,x1,y2,x2)
             num_gt_boxes += gt_boxes.shape[0]  # gt个数
 
             detected_gt_boxes = []  # 已经检测匹配过的gt边框
 
-
             for detect_box in all_detections[image_id][class_id]:
+
                 scores = np.append(scores, detect_box[4])
+
                 # 如果没有GT 边框
                 if gt_boxes.shape[0] == 0:
                     true_positives = np.append(true_positives, 0)
@@ -155,6 +161,8 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
                     continue
 
                 # 计算iou
+                # print(gt_boxes, detect_box[:4])
+                # exit()
                 iou = np_utils.compute_iou(gt_boxes, np.expand_dims(detect_box[:4], axis=0))  # n vs 1
                 max_iou = np.max(iou, axis=0)[0]  # 与GT边框的最大iou值
                 argmax_iou = np.argmax(iou, axis=0)[0]  # 最大iou值对应的GT
@@ -167,22 +175,31 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
                 else:
                     true_positives = np.append(true_positives, 0)
                     false_positives = np.append(false_positives, 1)
+                    # wrong.append('img:{}, class{}'.format(image_id, class_id))
+
 
         # 每个类别按照得分排序
         indices = np.argsort(scores * -1)
+
+        # [1. 1. 1. 1. 1. 0. 1. 1. 0. 0. 1. 1. 1. 0. 0. 0. 1. 0. 0.]
         true_positives = true_positives[indices]
         false_positives = false_positives[indices]
+        # print(class_id, true_positives)
 
-        # 累加
+        # 累加 [ 1.  2.  3.  4.  5.  5.  6.  7.  7.  7.  8.  9. 10. 10. 10. 10. 11. 11. 11.]
         true_positives = np.cumsum(true_positives)
         false_positives = np.cumsum(false_positives)
 
         # 计算召回率和精度
         recall = true_positives / num_gt_boxes
+        # print(recall)
         precision = true_positives / np.maximum(true_positives + false_positives, np.finfo(np.float64).eps)
         print('class:{}'.format(class_id))
+        print('gtboxes_num: {}'.format(num_gt_boxes))
         print('recall:{}'.format(recall[-1]) if len(recall) != 0 else recall)
-        print('precision:{}'.format(precision[0] if len(precision) != 0 else precision))
+        # 这里preci[0]改成-1
+        print('precision:{}'.format(precision[-1] if len(precision) != 0 else precision))
+        print('------------------------')
 
         # 计算ap
         average_precisions[class_id] = voc_ap(recall, precision, use_07_metric=use_07_metric)
