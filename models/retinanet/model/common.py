@@ -10,6 +10,7 @@ def bbox_transform_inv(boxes, deltas, mean=None, std=None):
     if std is None:
         std = [0.1, 0.1, 0.2, 0.2]
 
+    # x1,y1,x2,y2
     widths = boxes[:, :, 2] - boxes[:, :, 0]
     heights = boxes[:, :, 3] - boxes[:, :, 1]
     ctr_x = boxes[:, :, 0] + 0.5 * widths

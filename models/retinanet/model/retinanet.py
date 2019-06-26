@@ -185,6 +185,7 @@ def retinanet(
 def retinanet_bbox(inputs, num_classes, backbone_outputs, nms=True, name='retinanet-bbox', *args, **kwargs):
     model = retinanet(inputs=inputs, backbone_outputs=backbone_outputs, num_classes=num_classes, *args, **kwargs)
 
+    # [batch_size, ?, 4]
     anchors = model.outputs[0]
     regression = model.outputs[1]
     classification = model.outputs[2]
