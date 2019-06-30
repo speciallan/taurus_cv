@@ -72,7 +72,7 @@ current_config.voc_sub_dir = 'dd'
 test_img_list = get_prepared_detection_dataset(current_config).get_all_data()
 # test_img_list = get_voc_dataset('../../../../data/VOCdevkit', 'dd', class_mapping=classes)
 
-test_img_list = test_img_list[:100]
+# test_img_list = test_img_list[:100]
 
 
 for id, imgf in enumerate(test_img_list):
@@ -105,7 +105,7 @@ for id, imgf in enumerate(test_img_list):
         scores = detections[0, :, 4:]
 
         # 推测置信度 indices = [[0,1,2,3], [6,6,3,3]] idx + cls_labels
-        indices = np.where(detections[0, :, 4:] >= 0.2)
+        indices = np.where(detections[0, :, 4:] >= 0.25)
 
         scores = scores[indices]
 
