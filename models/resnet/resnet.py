@@ -300,13 +300,11 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
     P4 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p4")(P4)
     P5 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p5")(P5)
 
-    P6 = layers.MaxPooling2D(pool_size=(1, 1), strides=2, name="fpn_p6")(P5)
-
-    return Model(input, [c1,c2,c3,c4,c5], name='resnet50')
-    return [c1, c2, c3, c4, c5]
+    P6 = layers.Conv2D(top_down_pyramid_size, (3, 3), strides=2, padding='same', name='fpn_p6')(c5)
+    # P6 = layers.MaxPooling2D(pool_size=(1, 1), strides=2, name="fpn_p6")(P5)
 
     if is_extractor:
-        return [P2, P3, P4, P5, P6]
+        return Model(input, [P2, P3, P4, P5, P6], name='resnet50')
     else:
         return False
 

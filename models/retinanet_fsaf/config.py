@@ -158,8 +158,7 @@ class VocConfig(Config):
     pretrained_weights = get_pretrained_model(weight_path=backbone_weight_path, network=Config.BACKBONE)
 
     config_filepath = './config.ini'
-    rpn_weights = '/tmp/faster-rcnn-rpn.h5'
-    rcnn_weights = '/tmp/faster-rcnn-rcnn.h5'
+    retinanet_weights = './models/retinanet.h5'
     voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
     voc_sub_dir = 'VOC2007'
     log_path = './logs'

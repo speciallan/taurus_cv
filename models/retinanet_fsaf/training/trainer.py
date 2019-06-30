@@ -24,13 +24,13 @@ def set_runtime_environment():
     # keras.backend.set_floatx('float16')  # 设置字符精度，默认float32，使用float16会提高训练效率，但是可能导致精度不够，梯度出现问题。
 
 
-def get_callback(stage, config):
+def get_callback(config):
     """
     定义callback，用于每个epoch回调
     包括模型检查点ModelCheckpoint,学习率自减少ReduceLROnPlateau,训练过程可视化TensorBoard，他们都继承自Callback
     :return:
     """
-    checkpoint = ModelCheckpoint(filepath='/tmp/frcnn-' + stage + '.{epoch:03d}.h5', # 模型路径，默认保存在/tmp下
+    checkpoint = ModelCheckpoint(filepath='/tmp/retinanet.{epoch:03d}.h5', # 模型路径，默认保存在/tmp下
                                  monitor='acc',                                      # 监视值，包括精度acc、损失loss
                                  verbose=1,                                          # 是否显示进度条
                                  save_best_only=False,                               # 知否只保存最好模型

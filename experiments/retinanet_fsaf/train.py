@@ -13,13 +13,13 @@ from taurus_cv.models.retinanet_fsaf.networks.retinanet import retinanet as reti
 from taurus_cv.models.retinanet_fsaf.preprocessing.generator import generator
 from taurus_cv.models.retinanet_fsaf.training import trainer
 from taurus_cv.models.retinanet_fsaf.config import current_config as config
+from taurus_cv.models.retinanet.model.loss import getLoss
+from taurus_cv.models.retinanet.model.optimizer import get_optimizer
+
 from taurus_cv.utils.spe import spe
 
 
 def train(args):
-
-
-    print(args.__dict__)
 
     # 加载配置
 
@@ -38,15 +38,23 @@ def train(args):
     # t = gen.__next__()
     # spe(t)
 
-    spe(11)
-
     # 构造模型，加载权重
-    model = retinanet()
+    model = retinanet(config)
+    model.load_weights(config.pretrained_weights, by_name=True)
 
+    model.compile(loss=getLoss(), optimizer=get_optimizer(config.LEARNING_RATE), metrics=['accuracy'])
+
+    model.fit_generator(generator=gen,
+                        steps_per_epoch=len(train_img_list) // config.BATCH_SIZE,
+                        epochs=args.epochs,
+                        callbacks=trainer.get_callback(config))
+
+    model.save_weights(config.retinanet_weights)
 
     # 训练模型并保存
-    model = trainer.train_retinanet(model, gen)
+    # model = trainer.train_retinanet(model, gen)
 
+    spe(11)
 
 if __name__ == '__main__':
 
