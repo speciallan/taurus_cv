@@ -9,8 +9,6 @@ import cv2
 
 def generator(image_list, batch_size, image_size=(512,512), stage='train'):
 
-    print('generator')
-
     length = len(image_list)
     idx_list = range(length)
 

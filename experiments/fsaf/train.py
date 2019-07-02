@@ -8,13 +8,13 @@ import sys
 sys.path.append('../../..')
 
 
-from taurus_cv.models.retinanet_fsaf.io.input import get_prepared_detection_dataset
-from taurus_cv.models.retinanet_fsaf.networks.retinanet import retinanet as retinanet
-from taurus_cv.models.retinanet_fsaf.preprocessing.generator import generator
-from taurus_cv.models.retinanet_fsaf.training import trainer
-from taurus_cv.models.retinanet_fsaf.config import current_config as config
-from taurus_cv.models.retinanet.model.loss import getLoss
-from taurus_cv.models.retinanet.model.optimizer import get_optimizer
+from taurus_cv.models.fsaf.io.input import get_prepared_detection_dataset
+from taurus_cv.models.fsaf.networks.retinanet import retinanet as retinanet
+from taurus_cv.models.fsaf.preprocessing.generator import generator
+from taurus_cv.models.fsaf.training import trainer
+from taurus_cv.models.fsaf.config import current_config as config
+from taurus_cv.models.fsaf.layers.loss import getLoss
+from taurus_cv.models.fsaf.layers.optimizer import get_optimizer
 
 from taurus_cv.utils.spe import spe
 
@@ -33,10 +33,10 @@ def train(args):
 
     # 生成数据，增加google数据增强
     image_size = (config.IMAGE_MAX_DIM, config.IMAGE_MAX_DIM)
-    gen = generator(image_list=train_img_list, batch_size=config.IMAGES_PER_GPU, image_size=image_size)
+    gen = generator(image_list=train_img_list, batch_size=config.BATCH_SIZE, image_size=image_size)
 
-    # t = gen.__next__()
-    # spe(t)
+    t = gen.__next__()
+    spe(t[0].shape, t[1].shape)
 
     # 构造模型，加载权重
     model = retinanet(config)

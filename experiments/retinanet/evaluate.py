@@ -26,7 +26,7 @@ config = Config('configRetinaNet.json')
 
 wname = 'BASE'
 wpath = config.base_weights_path
-classes = ['0', '1', '2', '3', '4', '5', '6']
+classes = ['0', '1', '2', '3', '4', '5', '6', '7']
 
 if os.path.isfile(config.trained_weights_path):
     wname = "DEFINITIVI"
@@ -59,6 +59,7 @@ time_start = time.time()
 predict_boxes = []
 predict_scores = []
 predict_labels = []
+img_info = []
 
 start_index = config.test_start_index
 
@@ -72,13 +73,17 @@ current_config.voc_sub_dir = 'dd'
 test_img_list = get_prepared_detection_dataset(current_config).get_all_data()
 # test_img_list = get_voc_dataset('../../../../data/VOCdevkit', 'dd', class_mapping=classes)
 
-# test_img_list = test_img_list[:100]
+test_img_list = test_img_list[:200]
 
 
 for id, imgf in enumerate(test_img_list):
 
     # imgfp = os.path.join(config.test_images_path, imgf)
     imgfp = imgf['filepath']
+
+    # if test_img_list[id]['filename'] == '000227.jpg':
+    #     print(id, test_img_list[id])
+    #     exit()
 
     if os.path.isfile(imgfp):
 
@@ -105,15 +110,19 @@ for id, imgf in enumerate(test_img_list):
         scores = detections[0, :, 4:]
 
         # 推测置信度 indices = [[0,1,2,3], [6,6,3,3]] idx + cls_labels
-        indices = np.where(detections[0, :, 4:] >= 0.25)
+        indices = np.where(detections[0, :, 4:] >= 0.45)
 
         scores = scores[indices]
+
+        # if test_img_list[id]['filename'] == '000227.jpg':
+        #     print(detections[0][0])
 
         # 取前100个idx [0,1,2,3]
         scores_sort = np.argsort(-scores)[:100]
 
-        # 一张图的预测框
+        # 一张图的预测框 (?,4)
         image_boxes = detections[0, indices[0][scores_sort], :4]
+
         # spe(image_boxes, image_scores, image_detections)
         image_scores = detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]]
         image_predicted_labels = indices[1][scores_sort]
@@ -122,6 +131,12 @@ for id, imgf in enumerate(test_img_list):
         predict_boxes.append(image_boxes)
         predict_scores.append(image_scores)
         predict_labels.append(image_predicted_labels)
+        img_info.append(test_img_list[id])
+
+        # if test_img_list[id]['filename'] == '000227.jpg':
+        #     print(image_boxes, predict_boxes[190], predict_labels[190], img_info[190])
+        #     exit()
+
 
         image_scores = np.expand_dims(detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]], axis=1)
         image_detections = np.append(image_boxes, image_scores, axis=1)
@@ -130,10 +145,18 @@ for id, imgf in enumerate(test_img_list):
             print('预测完成：{}'.format(id + 1))
 
 
-# 以下是评估过程
+# 以下是评估过程 这里img_info是y1,x1,y2,x2
+# 找到问题了 anno 和 pre_boxes 没对应， 导致后面detection错误
 annotations = eval_utils.get_annotations(test_img_list, len(classes), order=True)
 detections = eval_utils.get_detections(predict_boxes, predict_scores, predict_labels, len(classes))
-average_precisions = eval_utils.voc_eval(annotations, detections, iou_threshold=0.05, use_07_metric=True)
+# 191 190 190 190    正常 158 - 159 问题
+# 000155 000274奇葩
+# spe(annotations[1], predict_boxes[0], detections[0], img_info[0])
+# n = 190
+# spe(annotations[n], predict_boxes[n], detections[n], img_info[n])
+# 这里问题大
+average_precisions = eval_utils.voc_eval(annotations, detections, img_info=img_info, iou_threshold=0.05, use_07_metric=True)
+
 
 if 1 == 0:
     # y1,x1,y2,x2 | 2 1 25 62 | 107 100 120 115, 通过order=True修改顺序为下面那种 1,2,62,25

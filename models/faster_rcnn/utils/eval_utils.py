@@ -29,10 +29,12 @@ def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0
 
     # 逐个图像处理
     for image_idx in range(num_images):
+
         # 去除padding
         cur_boxes = boxes[image_idx]  # (n,4)
         cur_scores = scores[image_idx]  # (n,)
         cur_predict_labels = predict_labels[image_idx]  # (n,)
+
         # 过滤排序
         indices = np.where(cur_scores >= score_shreshold)[0]  # 选中的索引号，tuple的第一个值，一个一维numpy数组
         select_scores = cur_scores[indices]
@@ -40,10 +42,12 @@ def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0
 
         # 最终的选中边框的索引号
         indices = indices[scores_sort_indices]
+
         # 选中的边框，得分，类别
         cur_boxes = cur_boxes[indices]
         cur_scores = cur_scores[indices]
         cur_predict_labels = cur_predict_labels[indices]
+
         # 合并边框和得分
         cur_detections = np.concatenate([cur_boxes, np.expand_dims(cur_scores, axis=1)], axis=1)
 
@@ -69,6 +73,7 @@ def get_annotations(image_info_list, num_classes, order=False):
     num_images = len(image_info_list)
     all_annotations = [[None for j in range(num_classes)] for i in range(num_images)]  # (num_images,num_classes)
     for image_idx in range(num_images):
+
         gt_boxes = image_info_list[image_idx]['boxes']  # 此图片的GT边框
         if order:
             gt_boxes = gt_boxes[:,[1,0,3,2]]
@@ -116,7 +121,7 @@ def voc_ap(rec, prec, use_07_metric=False):
     return ap
 
 
-def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=False):
+def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=False, img_info=None):
     """
     voc数据集评估
     :param all_annotations:list of list of numpy(num_boxes,4) [num_images,[num_classes,[num_gt,(y1,x1,y2,x2)]]]
@@ -140,12 +145,23 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         num_gt_boxes = 0.0
 
         # 记录错误
+        none = []
         wrong = []
 
+        # debug
+        # if class_id != 4:
+        #     continue
+
         # 逐个图像处理
+        # print('all_detection_num:', num_images)
+
         for image_id in range(num_images):
 
-            gt_boxes = all_annotations[image_id][class_id]  # (n,y1,x1,y2,x2)
+            gt_boxes = all_annotations[image_id][class_id]  # (n,x1,y1,x2,y2)
+
+            # 打印所有gtbox
+            # print(img_info[image_id]['filename'], gt_boxes.shape[0], gt_boxes)
+
             num_gt_boxes += gt_boxes.shape[0]  # gt个数
 
             detected_gt_boxes = []  # 已经检测匹配过的gt边框
@@ -154,15 +170,38 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
 
                 scores = np.append(scores, detect_box[4])
 
-                # 如果没有GT 边框
+                # 有gtbox的时候打印gt和det
+                # if img_info != None:
+                    # print_detection = detect_box.astype(np.int)
+                    # print('img:{}, gt:{}, det:{}'.format(img_info[image_id], gt_boxes, print_detection))
+
+                # 000142
+                # if img_info[image_id]['filename'] == '000227.jpg':
+                #     print(gt_boxes)
+                #     exit()
+
+                # 如果没有GT 边框  1！！！没有为什么要fp+ 因为没有gtbox但是被检测出来了
                 if gt_boxes.shape[0] == 0:
                     true_positives = np.append(true_positives, 0)
                     false_positives = np.append(false_positives, 1)
+
+                    # debug
+                    if img_info != None:
+                        img_info[image_id]['boxes'] = img_info[image_id]['boxes'][:, [1,0,3,2]]
+                        # print_detection = [map(int, box) for box in enumerate(detect_box)]
+                        print_gtboxes = gt_boxes.astype(np.int)
+                        print_detection = detect_box.astype(np.int)
+                        none.append('[none] img:{}, class:{}, gt:{}, det:{}'.format(img_info[image_id]['filename'], class_id, gt_boxes, print_detection))
+
                     continue
 
                 # 计算iou
                 # print(gt_boxes, detect_box[:4])
                 # exit()
+                # if img_info[image_id]['filename'] == '000295.jpg':
+                #     print(gt_boxes, detect_box)
+                #     exit()
+
                 iou = np_utils.compute_iou(gt_boxes, np.expand_dims(detect_box[:4], axis=0))  # n vs 1
                 max_iou = np.max(iou, axis=0)[0]  # 与GT边框的最大iou值
                 argmax_iou = np.argmax(iou, axis=0)[0]  # 最大iou值对应的GT
@@ -175,7 +214,18 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
                 else:
                     true_positives = np.append(true_positives, 0)
                     false_positives = np.append(false_positives, 1)
-                    # wrong.append('img:{}, class{}'.format(image_id, class_id))
+
+                    # debug
+                    if img_info != None:
+                        img_info[image_id]['boxes'] = img_info[image_id]['boxes'][:, [1,0,3,2]]
+                        # print_detection = [map(int, box) for box in enumerate(detect_box)]
+                        print_gtboxes = gt_boxes.astype(np.int)
+                        print_detection = detect_box.astype(np.int)
+                        wrong.append('[wrong] img:{}, class:{}, gt:{}, det:{}'.format(img_info[image_id]['filename'], class_id, gt_boxes, print_detection))
+
+        if class_id != 0:
+            [print(v) for k,v in enumerate(none)]
+            [print(v) for k,v in enumerate(wrong)]
 
 
         # 每个类别按照得分排序
@@ -193,6 +243,8 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         # 计算召回率和精度
         recall = true_positives / num_gt_boxes
         # print(recall)
+        # print(true_positives, true_positives + false_positives)
+
         precision = true_positives / np.maximum(true_positives + false_positives, np.finfo(np.float64).eps)
         print('class:{}'.format(class_id))
         print('gtboxes_num: {}'.format(num_gt_boxes))

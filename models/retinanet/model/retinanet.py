@@ -194,6 +194,6 @@ def retinanet_bbox(inputs, num_classes, backbone_outputs, nms=True, name='retina
     detections = keras.layers.Concatenate(axis=2)([boxes, classification] + model.outputs[3:])
 
     if nms:
-        detections = NonMaximumSuppression(name='nms', nms_threshold=0.5)([boxes, classification, detections])
+        detections = NonMaximumSuppression(name='nms', nms_threshold=0.05)([boxes, classification, detections])
 
     return keras.models.Model(inputs=inputs, outputs=model.outputs[1:] + [detections], name=name)

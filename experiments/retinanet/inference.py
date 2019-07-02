@@ -23,7 +23,7 @@ config = Config('configRetinaNet.json')
 
 wname = 'BASE'
 wpath = config.base_weights_path
-classes = ['0', '1', '2', '3', '4', '5', '6']
+classes = ['0', '1', '2', '3', '4', '5', '6', '7']
 
 if os.path.isfile(config.trained_weights_path):
     wname = "definitivi"
@@ -74,7 +74,7 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
         scores = detections[0, :, 4:]
 
         # 推测置信度
-        indices = np.where(detections[0, :, 4:] >= 0.25)
+        indices = np.where(detections[0, :, 4:] >= 0.45)
 
         scores = scores[indices]
 

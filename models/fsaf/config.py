@@ -15,7 +15,7 @@ from taurus_cv.pretrained_models.get import get as get_pretrained_model
 class Config(object):
 
     # 配置名称
-    NAME = 'retinanet_fsaf'
+    NAME = 'fsaf'
 
     # 并行GPU数量
     GPU_COUNT = 1
@@ -132,7 +132,7 @@ class Config(object):
 # PASCAL VOC2007数据集配置
 class VocConfig(Config):
 
-    NAME = 'retinanet_fsaf'
+    NAME = 'fsaf'
 
     IMAGES_PER_GPU = 1
 

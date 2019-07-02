@@ -236,6 +236,7 @@ class Generator(object):
         for image_index, image in enumerate(image_group):
             image_batch[image_index, :image.shape[0], :image.shape[1], :image.shape[2]] = image
 
+        # (1,512,512,3)
         return image_batch
 
     def anchor_targets(self,
@@ -248,6 +249,7 @@ class Generator(object):
                        **kwargs):
         return anchor_targets_bbox(image_shape, annotations, num_classes, mask_shape, negative_overlap, positive_overlap, **kwargs)
 
+    # image_group (1,512,512,3) anno_group (1,2,5) 1张图，2个gtbox, 4个坐标+置信度
     def compute_targets(self, image_group, annotations_group):
 
         max_shape = tuple(max(image.shape[x] for image in image_group) for x in range(3))
@@ -262,6 +264,10 @@ class Generator(object):
             anchor_states = np.max(labels_group[index], axis=1, keepdims=True)
             regression_group[index] = np.append(regression_group[index], anchor_states, axis=1)
 
+        # (1, 196416, 5) regression_group (1, 196416, 8) labels_group
+        # print(regression_group[0].shape, labels_group[0][:5])
+        # exit()
+
         labels_batch = np.zeros((self.batch_size,) + labels_group[0].shape, dtype=keras.backend.floatx())
         regression_batch = np.zeros((self.batch_size,) + regression_group[0].shape, dtype=keras.backend.floatx())
 
@@ -269,6 +275,7 @@ class Generator(object):
             labels_batch[index, ...] = labels
             regression_batch[index, ...] = regression
 
+        # (1, 196416, 5) (1, 196416, 8)
         return [regression_batch, labels_batch]
 
     def compute_input_output(self, group):

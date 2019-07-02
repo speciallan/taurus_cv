@@ -72,7 +72,9 @@ train_generator, val_generator, n_train_samples, n_val_samples = get_generators(
                                                                                 debug=False)
 
 callbacks = get_callbacks(config)
-# print(next(train_generator))
+# (1, 512, 512, 3) (1, 196416, 5) (1, 196416, 8)
+# t = next(train_generator)
+# print(t[0].shape, t[1][0].shape, t[1][1].shape)
 # exit()
 
 model.fit_generator(generator=train_generator,
