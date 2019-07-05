@@ -73,7 +73,7 @@ current_config.voc_sub_dir = 'dd'
 test_img_list = get_prepared_detection_dataset(current_config).get_all_data()
 # test_img_list = get_voc_dataset('../../../../data/VOCdevkit', 'dd', class_mapping=classes)
 
-test_img_list = test_img_list[:200]
+# test_img_list = test_img_list[:100]
 
 
 for id, imgf in enumerate(test_img_list):
@@ -110,7 +110,7 @@ for id, imgf in enumerate(test_img_list):
         scores = detections[0, :, 4:]
 
         # 推测置信度 indices = [[0,1,2,3], [6,6,3,3]] idx + cls_labels
-        indices = np.where(detections[0, :, 4:] >= 0.45)
+        indices = np.where(detections[0, :, 4:] >= 0.3)
 
         scores = scores[indices]
 
@@ -138,23 +138,28 @@ for id, imgf in enumerate(test_img_list):
         #     exit()
 
 
-        image_scores = np.expand_dims(detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]], axis=1)
-        image_detections = np.append(image_boxes, image_scores, axis=1)
+        # image_scores = np.expand_dims(detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]], axis=1)
+        # image_detections = np.append(image_boxes, image_scores, axis=1)
 
         if id % 100 == 0:
             print('预测完成：{}'.format(id + 1))
 
+    else:
+        print('not exist:', imgfp)
+
 
 # 以下是评估过程 这里img_info是y1,x1,y2,x2
-# 找到问题了 anno 和 pre_boxes 没对应， 导致后面detection错误
-annotations = eval_utils.get_annotations(test_img_list, len(classes), order=True)
+# 找到问题了 anno 和 pre_boxes 没对应， 导致后面detection错误 修改了get_annotations 里面-1
+annotations = eval_utils.get_annotations(img_info, len(classes), order=True)
 detections = eval_utils.get_detections(predict_boxes, predict_scores, predict_labels, len(classes))
-# 191 190 190 190    正常 158 - 159 问题
-# 000155 000274奇葩
-# spe(annotations[1], predict_boxes[0], detections[0], img_info[0])
-# n = 190
+# spe(img_info[4], annotations[4][6])
+
+# print(len(predict_boxes), len(predict_scores), len(predict_labels), len(img_info))
+# print(len(annotations), len(predict_boxes), len(detections), len(img_info))
+# n = 90
 # spe(annotations[n], predict_boxes[n], detections[n], img_info[n])
 # 这里问题大
+
 average_precisions = eval_utils.voc_eval(annotations, detections, img_info=img_info, iou_threshold=0.05, use_07_metric=True)
 
 

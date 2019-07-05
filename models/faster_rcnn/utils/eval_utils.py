@@ -158,10 +158,10 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         for image_id in range(num_images):
 
             gt_boxes = all_annotations[image_id][class_id]  # (n,x1,y1,x2,y2)
+            # print('cid:', class_id, 'imgid:', image_id, img_info[image_id]['filename'], len(gt_boxes))
 
             # 打印所有gtbox
             # print(img_info[image_id]['filename'], gt_boxes.shape[0], gt_boxes)
-
             num_gt_boxes += gt_boxes.shape[0]  # gt个数
 
             detected_gt_boxes = []  # 已经检测匹配过的gt边框
@@ -226,7 +226,6 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
         if class_id != 0:
             [print(v) for k,v in enumerate(none)]
             [print(v) for k,v in enumerate(wrong)]
-
 
         # 每个类别按照得分排序
         indices = np.argsort(scores * -1)

@@ -14,10 +14,10 @@
     "base_weights": "./h5/base_{}.h5",
     "trained_weights": "./h5/result.h5",
     "chkpnt_weights": "./h5/chkpnt_best_{val_loss:.4f}.h5",
-    "images": "../../../../data/VOCdevkit/dd2/JPEGImages/",
-    "annotations": "../../../../data/VOCdevkit/dd2/Annotations/",
-    "test_images": "../../../../data/VOCdevkit/dd2/JPEGImages/",
-    "test_result": "../../../../data/VOCdevkit/dd2/results/",
+    "images": "../../../../data/VOCdevkit/dd/JPEGImages/",
+    "annotations": "../../../../data/VOCdevkit/dd/Annotations/",
+    "test_images": "../../../../data/VOCdevkit/dd/JPEGImages/",
+    "test_result": "../../../../data/VOCdevkit/dd/results/",
     "log": "./logs/"
   },
   "model": {
