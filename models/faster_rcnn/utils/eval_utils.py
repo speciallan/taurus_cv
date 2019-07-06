@@ -223,9 +223,9 @@ def voc_eval(all_annotations, all_detections, iou_threshold=0.5, use_07_metric=F
                         print_detection = detect_box.astype(np.int)
                         wrong.append('[wrong] img:{}, class:{}, gt:{}, det:{}'.format(img_info[image_id]['filename'], class_id, gt_boxes, print_detection))
 
-        if class_id != 0:
-            [print(v) for k,v in enumerate(none)]
-            [print(v) for k,v in enumerate(wrong)]
+        # if class_id != 0:
+        #     [print(v) for k,v in enumerate(none)]
+        #     [print(v) for k,v in enumerate(wrong)]
 
         # 每个类别按照得分排序
         indices = np.argsort(scores * -1)
