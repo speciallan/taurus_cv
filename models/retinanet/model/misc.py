@@ -35,10 +35,14 @@ class Anchors(keras.layers.Layer):
 
     def call(self, inputs, **kwargs):
 
+        # FPN每一层的特征 (None, 64, 64, 256) -> 32,16,8,4 -> (None, 4, 4, 256)
         features = inputs
         features_shape = keras.backend.shape(features)[:3]
 
+        # (?,4)
         anchorsShift = shift(features_shape[1:3], self.stride, self.anchors)
+
+        # (1,?,4) -> (batch,?,4)
         anchors = keras.backend.tile(keras.backend.expand_dims(anchorsShift, axis=0), (features_shape[0], 1, 1))
 
         return anchors

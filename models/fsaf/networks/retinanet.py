@@ -9,42 +9,37 @@ import keras
 from keras.layers import Input
 
 from taurus_cv.models.resnet.resnet import resnet50_fpn
-from taurus_cv.models.retinanet.model.misc import UpsampleLike, RegressBoxes, NonMaximumSuppression, Anchors
+from taurus_cv.models.retinanet.model.misc import RegressBoxes, NonMaximumSuppression, Anchors
+from taurus_cv.utils.spe import spe
 
 
 def retinanet(config, stage = 'train'):
 
-    batch_size = config.IMAGES_PER_GPU
-
     input_images = Input(shape=config.IMAGE_INPUT_SHAPE)
-    gt_class_ids = Input(shape=(config.MAX_GT_INSTANCES, config.NUM_CLASSES))
-    gt_boxes = Input(shape=(config.MAX_GT_INSTANCES, 4 + 1))
 
-    fpn_model = resnet50_fpn(input_images, config.NUM_CLASSES, is_extractor=True)
-    features = fpn_model.outputs
+    backbone = resnet50_fpn(input_images, config.NUM_CLASSES, is_extractor=True)
+    features = backbone.outputs
 
     # anchor参数
     anchor_parameters = AnchorParameters.default
     submodels = default_submodels(config.NUM_CLASSES, anchor_parameters)
 
+    # 生成FPN所有子模型并连接
     pyramid = __build_pyramid(submodels, features)
+
+    # 生成FPN所有层不同尺度anchor的集合 (1,?,4)
     anchors = __build_anchors(anchor_parameters, features)
 
-    outputs = [anchors] + pyramid
-    # return keras.models.Model(inputs=input_images, outputs=[anchors] + pyramid, name='retinanet')
-
-    # [batch_size, ?, 4]
-    anchors = outputs[0]
-    regression = outputs[1]
-    classification = outputs[2]
+    # [batch_size, ?, 4] [b, ?, 8]
+    regression, classification = pyramid
 
     boxes = RegressBoxes(name='boxes')([anchors, regression])
     detections = keras.layers.Concatenate(axis=2)([boxes, classification])
 
-    # NMS
-    detections = NonMaximumSuppression(name='nms', nms_threshold=0.5)([boxes, classification, detections])
+    # NMS 用于预测
+    detections = NonMaximumSuppression(name='nms', nms_threshold=0.05)([boxes, classification, detections])
 
-    return keras.models.Model(inputs=input_images, outputs=[regression, classification, detections], name='retinanet')
+    return keras.models.Model(inputs=[input_images], outputs=[regression, classification, detections], name='retinanet')
 
 
 def default_submodels(num_classes, anchor_parameters):
@@ -72,6 +67,8 @@ def __build_anchors(anchor_parameters, features):
             scales=anchor_parameters.scales,
             name='anchors_{}'.format(i)
         )(f))
+
+    # 将每一层不同尺度anchors拼到一起
     return keras.layers.Concatenate(axis=1)(anchors)
 
 

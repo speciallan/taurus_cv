@@ -3,11 +3,12 @@
 # Author:Speciallan
 
 import keras
+import tensorflow as tf
 
 from taurus_cv.models.retinanet.model import tensorflow_backend
 
 # 自定义损失，字典，总损失是每个loss之和
-def getLoss():
+def get_loss():
 
     return {
         'regression': smooth_l1(),
@@ -55,13 +56,14 @@ def smooth_l1(sigma=3.0):
 
     sigma_squared = sigma ** 2
 
+    # (1,5,4) (1,?,4)
     def _smooth_l1(y_true, y_pred):
         # separate target and state
         regression        = y_pred
         regression_target = y_true[:, :, :4]
         anchor_state      = y_true[:, :, 4]
 
-        # filter out "ignore" anchors
+        # filter out "ignore" anchors 只取anchor_start==1的
         indices           = tensorflow_backend.where(keras.backend.equal(anchor_state, 1))
         regression        = tensorflow_backend.gather_nd(regression, indices)
         regression_target = tensorflow_backend.gather_nd(regression_target, indices)

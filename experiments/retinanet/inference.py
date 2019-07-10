@@ -72,7 +72,10 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
         orig_image = read_image_rgb(imgfp)
 
         _, _, detections = model.predict_on_batch(np.expand_dims(img, axis=0))
+        # print(detections[0][0][:4], detections[0][0][4:])
+        # exit()
 
+        # bbox要取到边界内
         detections[:, :, 0] = np.maximum(0, detections[:, :, 0])
         detections[:, :, 1] = np.maximum(0, detections[:, :, 1])
         detections[:, :, 2] = np.minimum(img.shape[1], detections[:, :, 2])
