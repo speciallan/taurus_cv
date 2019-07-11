@@ -42,7 +42,7 @@ def train(args):
 
     # 构造模型，加载权重
     model = retinanet(config)
-    model.load_weights(config.pretrained_weights, by_name=True)
+    # model.load_weights(config.pretrained_weights, by_name=True)
 
     model.compile(loss=get_loss(), optimizer=get_optimizer(config.LEARNING_RATE), metrics=['accuracy'])
 

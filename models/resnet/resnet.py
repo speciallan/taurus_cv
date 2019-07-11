@@ -252,19 +252,20 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
 
     # 池化
     x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
+    c2 = x
 
     # conv2 [64,64,256]*3
     x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(2, 2))
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
-    c2 = x
+    c3 = x
 
     # conv3 [128,128,512]*4
     x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='c')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='d')
-    c3 = x
+    c4 = x
 
     # conv4 [256,256,1024]*6
     x = conv_block(x, 3, [256, 256, 1024], stage=4, block='a')
@@ -273,13 +274,13 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='d')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='e')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='f')
-    c4 = x
+    c5 = x
 
     # conv5 [512,512,2048]*3
     x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
     x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
     x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
-    c5 = x
+    c6 = x
 
     #FPN
     top_down_pyramid_size = 256
