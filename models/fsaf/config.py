@@ -143,7 +143,6 @@ class VocConfig(Config):
     # batch_size
     BATCH_SIZE = IMAGES_PER_GPU
 
-    NUM_CLASSES = 8
     CLASS_MAPPING = {'0': 0,
                      '1': 1,
                      '2': 2,
@@ -151,8 +150,8 @@ class VocConfig(Config):
                      '4': 4,
                      '5': 5,
                      '6': 6,
-                     '7': 7
-                     }
+                     '7': 7}
+    NUM_CLASSES = len(CLASS_MAPPING)
 
     backbone_weight_path = ''
     pretrained_weights = get_pretrained_model(weight_path=backbone_weight_path, network=Config.BACKBONE)

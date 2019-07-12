@@ -251,36 +251,35 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
     c1 = x
 
     # 池化
-    x = layers.MaxPooling2D((3, 3), strides=(2, 2))(x)
-    c2 = x
+    x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
     # conv2 [64,64,256]*3
-    x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(2, 2))
+    c2 = x
+    x = conv_block(x, 3, [64, 64, 256], stage=2, block='a')
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
-    c3 = x
 
     # conv3 [128,128,512]*4
+    c3 = x
     x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='c')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='d')
-    c4 = x
 
     # conv4 [256,256,1024]*6
+    c4 = x
     x = conv_block(x, 3, [256, 256, 1024], stage=4, block='a')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='b')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='c')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='d')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='e')
     x = identity_block(x, 3, [256, 256, 1024], stage=4, block='f')
-    c5 = x
 
     # conv5 [512,512,2048]*3
+    c5 = x
     x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
     x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
     x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
-    c6 = x
 
     #FPN
     top_down_pyramid_size = 256
@@ -299,13 +298,17 @@ def resnet50_fpn(input, classes_num=1000, layer_num=50, is_extractor=False, outp
     P2 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p2")(P2)
     P3 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p3")(P3)
     P4 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p4")(P4)
-    P5 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p5")(P5)
+    # P5 = layers.Conv2D(top_down_pyramid_size, (3, 3), padding="SAME", name="fpn_p5")(P5)
 
     P6 = layers.Conv2D(top_down_pyramid_size, (3, 3), strides=2, padding='same', name='fpn_p6')(c5)
     # P6 = layers.MaxPooling2D(pool_size=(1, 1), strides=2, name="fpn_p6")(P5)
 
+    # print(c2,c3,c4,c5)
+    # print(P2,P3,P4,P5,P6)
+    # exit()
+
     if is_extractor:
-        return Model(input, [P2, P3, P4, P5, P6], name='resnet50')
+        return Model(input, [P2, P3, P4, P5, P6], name='resnet50_fpn')
     else:
         return False
 

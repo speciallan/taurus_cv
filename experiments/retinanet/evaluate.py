@@ -73,7 +73,7 @@ current_config.voc_sub_dir = 'dd'
 test_img_list = get_prepared_detection_dataset(current_config).get_all_data()
 # test_img_list = get_voc_dataset('../../../../data/VOCdevkit', 'dd', class_mapping=classes)
 
-# test_img_list = test_img_list[:100]
+test_img_list = test_img_list[:100]
 
 
 for id, imgf in enumerate(test_img_list):

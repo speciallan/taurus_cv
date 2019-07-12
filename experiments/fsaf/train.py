@@ -7,6 +7,7 @@ import sys
 
 sys.path.append('../../..')
 
+from keras import metrics
 
 from taurus_cv.models.fsaf.io.input import get_prepared_detection_dataset
 from taurus_cv.models.fsaf.networks.retinanet import retinanet as retinanet
@@ -27,8 +28,8 @@ def train(args):
     trainer.set_runtime_environment()
 
     # 获取VOC数据集中的训练集数据，并根据models/retinanet/config中的分类关联数据，得到最后的训练测试集 / io模块
-    train_img_list = get_prepared_detection_dataset(config).get_train_data()
-    train_img_list = train_img_list[:10]
+    train_img_list = get_prepared_detection_dataset(config).get_all_data()
+    # train_img_list = train_img_list[:10]
 
     print("训练集图片数量:{}".format(len(train_img_list)))
 
@@ -42,7 +43,6 @@ def train(args):
 
     # 构造模型，加载权重
     model = retinanet(config)
-    # model.load_weights(config.pretrained_weights, by_name=True)
 
     model.compile(loss=get_loss(), optimizer=get_optimizer(config.LEARNING_RATE), metrics=['accuracy'])
 

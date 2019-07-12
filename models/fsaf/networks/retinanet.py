@@ -17,16 +17,20 @@ def retinanet(config, stage = 'train'):
 
     input_images = Input(shape=config.IMAGE_INPUT_SHAPE)
 
-    # import keras_resnet
-    # import keras_resnet.models
-    # backbone = keras_resnet.models.ResNet50(input_images, include_top=False, freeze_bn=True)
-    # c2, c3, c4, c5 = backbone.outputs[0:]
-    # features = __create_pyramid_features(c2, c3, c4, c5)
+    import keras_resnet.models
+    backbone = keras_resnet.models.ResNet50(input_images, include_top=False, freeze_bn=True)
+    backbone.load_weights('/home/speciallan/.keras/models/ResNet-50-model.keras.h5', by_name=True, skip_mismatch=True)
+    for l in backbone.layers:
+        l.trainable = False
+    c2, c3, c4, c5 = backbone.outputs[0:]
+    features = __create_pyramid_features(c2, c3, c4, c5)
+    # print(c2,c3,c4,c5,'\n')
+    # print(features)
 
-    backbone = resnet50_fpn(input_images, config.NUM_CLASSES, is_extractor=True)
-    features = backbone.outputs
-
-    spe(features)
+    # backbone = resnet50_fpn(input_images, config.NUM_CLASSES, is_extractor=True)
+    # backbone.load_weights(config.pretrained_weights, by_name=True)
+    # features = backbone.outputs
+    # spe(features)
 
     # anchor参数
     anchor_parameters = AnchorParameters.default
@@ -116,8 +120,8 @@ class AnchorParameters:
 
 
 AnchorParameters.default = AnchorParameters(
-    # sizes=[32, 64, 128, 256, 512],
-    # strides=[8, 16, 32, 64, 128],
+    # sizes=[8, 16, 32, 64, 128, 256],
+    # strides=[2, 4, 8, 16, 32, 64],
     # sizes是步长的4倍
     sizes=[16, 32, 64, 128, 256],
     strides=[4, 8, 16, 32, 64],

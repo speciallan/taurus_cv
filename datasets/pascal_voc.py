@@ -62,6 +62,7 @@ def get_voc_dataset(input_path, sub_dir='VOC2007', class_mapping=[]):
                 print(e)
 
         annos = [os.path.join(anno_path, s) for s in os.listdir(anno_path)]
+        annos.sort()
 
         idx = 0
 
