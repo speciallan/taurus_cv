@@ -21,7 +21,8 @@ def retinanet(config, stage = 'train'):
     backbone = keras_resnet.models.ResNet50(input_images, include_top=False, freeze_bn=True)
     backbone.load_weights('/home/speciallan/.keras/models/ResNet-50-model.keras.h5', by_name=True, skip_mismatch=True)
     for l in backbone.layers:
-        l.trainable = False
+        if isinstance(l, keras.layers.BatchNormalization):
+            l.trainable = False
     c2, c3, c4, c5 = backbone.outputs[0:]
     features = __create_pyramid_features(c2, c3, c4, c5)
     # print(c2,c3,c4,c5,'\n')

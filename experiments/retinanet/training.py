@@ -31,7 +31,6 @@ else:
     exit(1)
 
 print("backend: ", config.type)
-# model.summary()
 
 if os.path.isfile(config.pretrained_weights_path):
     model.load_weights(config.pretrained_weights_path, by_name=True, skip_mismatch=True)
