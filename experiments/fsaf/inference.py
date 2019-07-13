@@ -25,6 +25,7 @@ def inference(args):
     model.load_weights(config.retinanet_weights, by_name=True)
 
     test_img_list = get_prepared_detection_dataset(config).get_all_data()
+    test_img_list = test_img_list[:100]
 
     # 基本设置
     font = cv2.FONT_HERSHEY_SIMPLEX

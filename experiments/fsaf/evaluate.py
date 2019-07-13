@@ -29,7 +29,7 @@ def evaluate(args):
     time_start = time.time()
 
     test_img_list = get_prepared_detection_dataset(config).get_all_data()
-    test_img_list = test_img_list[:10]
+    test_img_list = test_img_list[:100]
 
     # 预测边框、得分、类别
     predict_boxes = []
