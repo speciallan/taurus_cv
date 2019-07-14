@@ -8,6 +8,7 @@ import cv2
 import keras
 
 from taurus_cv.models.fsaf.preprocessing.anchors import anchor_targets_bbox, bbox_transform
+from taurus_cv.models.fsaf.preprocessing.image import preprocess_image
 from taurus_cv.utils.spe import spe
 
 
@@ -19,24 +20,31 @@ def generator(image_list, num_classes, batch_size, image_size=(512,512), stage='
     while True:
 
         ids = random.sample(idx_list, batch_size)
-        batch_image = []
-        batch_bbox = []
+        batch_images = []
+        batch_annotations = []
 
         for id in ids:
+
+            # img
             image = cv2.imread(image_list[id]['filepath'])
             image = cv2.resize(image, image_size)
+
+            # anno
             gt_bbox = image_list[id]['boxes']
             label = np.array([image_list[id]['labels']], dtype='float').T
-
-            batch_image.append(image)
             gt_bbox_with_label = np.append(gt_bbox, label, axis=1)
-            batch_bbox.append(gt_bbox_with_label)
+
+            # 预处理
+            img_preprocessed = preprocess_image(image)
+
+            batch_images.append(img_preprocessed)
+            batch_annotations.append(gt_bbox_with_label)
 
         # model inputs
-        inputs = np.array(batch_image)
+        inputs = np.array(batch_images)
 
         # model outputs
-        outputs = get_outputs(batch_image, batch_bbox, batch_size, num_classes)
+        outputs = get_outputs(batch_images, batch_annotations, batch_size, num_classes)
         # spe(inputs[0].shape, outputs[0].shape, outputs[1].shape, outputs[0][0][:5], outputs[1][0][:5])
 
         if stage == 'train':
