@@ -43,12 +43,12 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, weights='ima
         inputs = keras.layers.Input(shape=(None, None, 3))
 
     # determine which weights to load
-    if weights == 'imagenet':
-        weights_path = download_imagenet(backbone)
-    elif weights is None:
-        weights_path = None
-    else:
-        weights_path = weights
+    # if weights == 'imagenet':
+    #     weights_path = download_imagenet(backbone)
+    # elif weights is None:
+    #     weights_path = None
+    # else:
+    #     weights_path = weights
 
     # create the resnet backbone
     if backbone == 'resnet50':
@@ -69,8 +69,8 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, weights='ima
     model = retinanet_bbox(inputs=inputs, num_classes=num_classes, backbone_outputs=resnet.outputs[0:], **kwargs)
 
     # optionally load weights
-    if weights_path:
-        model.load_weights(weights_path, by_name=True, skip_mismatch=skip_mismatch)
-        print("BACKEND")
+    # if weights_path:
+        # model.load_weights(weights_path, by_name=True, skip_mismatch=skip_mismatch)
+        # print("BACKEND")
 
     return model, resnet.layers

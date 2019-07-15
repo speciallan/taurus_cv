@@ -31,10 +31,8 @@ def train(args):
     trainer.set_runtime_environment()
 
     # 获取VOC数据集中的训练集数据，并根据models/retinanet/config中的分类关联数据，得到最后的训练测试集 / io模块
-    train_img_list = get_prepared_detection_dataset(config).get_train_data()
+    # train_img_list = get_prepared_detection_dataset(config).get_train_data()
     # train_img_list = train_img_list[:100]
-
-    print("训练集图片数量:{}".format(len(train_img_list)))
 
     # 生成数据，增加google数据增强 [[1,512,512,3] -> model.outputs for y_pred, [1,?,4+8] for y_true]
     # image_size = (config.IMAGE_MAX_DIM, config.IMAGE_MAX_DIM)
@@ -50,6 +48,7 @@ def train(args):
                                                                                 img_max_size=config_json.img_max_size,
                                                                                 transform=config_json.augmentation,
                                                                                 debug=False)
+    print("训练集图片数量:{}".format(n_train_samples))
 
     # t = next(gen)
     # print(t[0].shape, t[1][0].shape, t[1][1].shape)
@@ -60,7 +59,7 @@ def train(args):
     model.compile(loss=get_loss(), optimizer=get_optimizer(config.LEARNING_RATE), metrics=['accuracy'])
 
     model.fit_generator(generator=train_generator,
-                        steps_per_epoch=len(train_img_list) // config.BATCH_SIZE,
+                        steps_per_epoch=n_train_samples // config.BATCH_SIZE,
                         epochs=args.epochs,
                         callbacks=trainer.get_callback(config))
 

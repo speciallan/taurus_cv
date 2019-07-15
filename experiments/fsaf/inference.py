@@ -13,6 +13,7 @@ import numpy as np
 
 from taurus_cv.models.fsaf.io.input import get_prepared_detection_dataset
 from taurus_cv.models.fsaf.networks.retinanet import retinanet
+from taurus_cv.models.fsaf.preprocessing.image import preprocess_image, resize_image
 from taurus_cv.models.fsaf.config import current_config as config
 from taurus_cv.utils.spe import spe
 
@@ -25,7 +26,7 @@ def inference(args):
     model.load_weights(config.retinanet_weights, by_name=True)
 
     test_img_list = get_prepared_detection_dataset(config).get_all_data()
-    test_img_list = test_img_list[:100]
+    # test_img_list = test_img_list[:100]
 
     # 基本设置
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -37,6 +38,8 @@ def inference(args):
         if os.path.exists(img_info['filepath']):
 
             img = cv2.imread(img_info['filepath'])
+            # img = preprocess_image(img.copy())
+            # img, scale = resize_image(img, min_side=config.IMAGE_MIN_DIM, max_side=config.IMAGE_MAX_DIM)
             _, _, detections = model.predict(np.expand_dims(img, axis=0))
 
             scores = detections[0, :, 4:]

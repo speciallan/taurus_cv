@@ -27,12 +27,13 @@ model = retinanet(config2)
 # model = retinanet(config2)
 model.compile(loss=get_loss(), optimizer=get_optimizer(0.001), metrics=['accuracy'])
 
-config2.voc_path = '/home/speciallan/Documents/python/data/VOCdevkit'
-config2.voc_sub_dir = 'dd2'
+config2.voc_path = '/home/mlg1504/speciallan/python/data/VOCdevkit'
+config2.voc_sub_dir = 'dd'
 print(config2.voc_path, config2.voc_sub_dir)
-train_img_list = get_prepared_detection_dataset(config2).get_train_data()
+# train_img_list = get_prepared_detection_dataset(config2).get_train_data()
 # train_img_list = train_img_list[:10]
-print("训练集图片数量:{}".format(len(train_img_list)))
+# n_train_samples = len(train_img_list)
+# print("训练集图片数量:{}".format(len(train_img_list)))
 
 # 生成数据，增加google数据增强 [[1,512,512,3] -> model.outputs for y_pred, [1,?,4+8] for y_true]
 # image_size = (config2.IMAGE_MAX_DIM, config2.IMAGE_MAX_DIM)
@@ -51,7 +52,7 @@ train_generator, val_generator, n_train_samples, n_val_samples = get_generators(
                                                                                 debug=False)
 
 model.fit_generator(generator=train_generator,
-                    steps_per_epoch=ceil(len(train_img_list) / config2.BATCH_SIZE),
+                    steps_per_epoch=ceil(n_train_samples / config2.BATCH_SIZE),
                     epochs=10,
                     callbacks=trainer.get_callback(config2))
 

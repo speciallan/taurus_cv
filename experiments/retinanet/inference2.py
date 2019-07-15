@@ -14,8 +14,9 @@ from matplotlib import pyplot as plt
 
 from taurus_cv.models.retinanet.model.pascal_voc import save_annotations
 from taurus_cv.models.retinanet.model.image import read_image_bgr, preprocess_image, resize_image, read_image_rgb
-from taurus_cv.models.retinanet.model.resnet import resnet_retinanet
 from taurus_cv.models.retinanet.config import Config
+from taurus_cv.models.fsaf.networks.retinanet import retinanet as retinanet
+from taurus_cv.models.fsaf.config import current_config as config2
 
 start_time = time.time()
 
@@ -34,12 +35,8 @@ if os.path.isfile(config.pretrained_weights_path):
     wpath = config.pretrained_weights_path
     classes = config.classes
 
-if config.type.startswith('resnet'):
-    model, _ = resnet_retinanet(len(classes), backbone=config.type, weights='imagenet', nms=True)
-else:
-    model = None
-    print("模型 ({})".format(config.type))
-    exit(1)
+model = retinanet(config2)
+model.load_weights(config2.retinanet_weights)
 
 print("backend: ", config.type)
 
@@ -72,7 +69,7 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
         orig_image = read_image_rgb(imgfp)
 
         _, _, detections = model.predict_on_batch(np.expand_dims(img, axis=0))
-        # print(detections[0][:5], detections[0][:5][4:])
+        # print(detections[0][0][:4], detections[0][0][4:])
         # exit()
 
         # bbox要取到边界内
@@ -86,7 +83,7 @@ for nimage, imgf in enumerate(sorted(os.listdir(config.test_images_path))):
         scores = detections[0, :, 4:]
 
         # 推测置信度
-        indices = np.where(detections[0, :, 4:] >= 0.2)
+        indices = np.where(detections[0, :, 4:] >= 0.3)
 
         scores = scores[indices]
 
