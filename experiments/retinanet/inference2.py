@@ -21,6 +21,8 @@ from taurus_cv.models.fsaf.config import current_config as config2
 start_time = time.time()
 
 config = Config('configRetinaNet.json')
+config.trained_weights_path = './h5/result2.h5'
+config.test_result_path = "../../../../data/VOCdevkit/dd2/results/"
 
 wname = 'BASE'
 wpath = config.base_weights_path
@@ -35,8 +37,10 @@ if os.path.isfile(config.pretrained_weights_path):
     wpath = config.pretrained_weights_path
     classes = config.classes
 
-model = retinanet(config2)
-model.load_weights(config2.retinanet_weights)
+# model = retinanet(config2)
+from taurus_cv.models.retinanet.model.resnet import resnet_retinanet
+model, bodyLayers = resnet_retinanet(len(config.classes), backbone=config.type, weights='imagenet', nms=True)
+model.load_weights(config.trained_weights_path)
 
 print("backend: ", config.type)
 

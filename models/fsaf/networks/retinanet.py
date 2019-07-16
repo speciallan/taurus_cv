@@ -131,6 +131,7 @@ def default_classification_model(num_classes,
             **options
         )(outputs)
 
+    # anchor-based
     outputs = keras.layers.Conv2D(
         filters=num_classes * num_anchors,
         kernel_initializer=keras.initializers.zeros(),

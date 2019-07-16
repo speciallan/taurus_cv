@@ -34,7 +34,7 @@ def get_callback(config):
                                  monitor='acc',                                      # 监视值，包括精度acc、损失loss
                                  verbose=1,                                          # 是否显示进度条
                                  save_best_only=False,                               # 知否只保存最好模型
-                                 period=2)                                           # checkpoint间隔的epoch数量
+                                 period=5)                                           # checkpoint间隔的epoch数量
 
     # 验证误差没有提升
     lr_reducer = ReduceLROnPlateau(monitor='loss', # 监视值

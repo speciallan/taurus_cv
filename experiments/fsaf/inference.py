@@ -10,6 +10,8 @@ sys.path.append('../../..')
 
 import cv2
 import numpy as np
+import keras
+import keras_resnet.models
 
 from taurus_cv.models.fsaf.io.input import get_prepared_detection_dataset
 from taurus_cv.models.fsaf.networks.retinanet import retinanet
@@ -23,10 +25,10 @@ def inference(args):
     start_time = time.time()
 
     model = retinanet(config)
-    model.load_weights(config.retinanet_weights, by_name=True)
+    model.load_weights(config.retinanet_weights, by_name=True, skip_mismatch=True)
 
     test_img_list = get_prepared_detection_dataset(config).get_all_data()
-    # test_img_list = test_img_list[:100]
+    test_img_list = test_img_list[:100]
 
     # 基本设置
     font = cv2.FONT_HERSHEY_SIMPLEX
