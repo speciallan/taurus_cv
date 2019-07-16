@@ -20,14 +20,6 @@ from taurus_cv.utils.spe import spe
 
 def show(args):
 
-    time_start = time.time()
-
-    model = retinanet(config)
-    model.load_weights(config.retinanet_weights, by_name=True)
-
-    time_load_model = time.time() - time_start
-    time_start = time.time()
-
     test_img_list = get_prepared_detection_dataset(config).get_all_data()
 
     # 基本设置

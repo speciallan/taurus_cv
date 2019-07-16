@@ -52,9 +52,9 @@ def train(args):
                                                                                 debug=False)
     print("训练集图片数量:{}".format(n_train_samples))
 
-    t = next(train_generator)
-    print(t[0].shape, t[1][0].shape, t[1][1].shape)
-    exit()
+    # t = next(gen)
+    # print(t[0].shape, t[1][0].shape, t[1][1].shape)
+    # exit()
 
     # 构造模型，加载权重
     model = retinanet(config)

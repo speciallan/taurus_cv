@@ -124,7 +124,9 @@ for id, imgf in enumerate(test_img_list):
         image_boxes = detections[0, indices[0][scores_sort], :4]
 
         # spe(image_boxes, image_scores, image_detections)
+        # 跟模型有关，默认上面 自己的用下面
         image_scores = detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]]
+        # image_scores = np.expand_dims(detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]], axis=1)
         image_predicted_labels = indices[1][scores_sort]
 
         # 添加到列表中

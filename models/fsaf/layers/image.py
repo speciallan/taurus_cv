@@ -5,7 +5,7 @@ import cv2
 import keras
 import numpy as np
 
-from taurus_cv.models.fsaf.layers.transform import change_transform_origin
+from taurus_cv.models.retinanet.model.transform import change_transform_origin
 
 
 def read_image_rgb(path):

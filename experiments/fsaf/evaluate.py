@@ -13,16 +13,21 @@ import numpy as np
 
 from taurus_cv.models.fsaf.io.input import get_prepared_detection_dataset
 from taurus_cv.models.fsaf.networks.retinanet import retinanet
+from taurus_cv.models.fsaf.preprocessing.image import preprocess_image, resize_image
 from taurus_cv.models.fsaf.config import current_config as config
 from taurus_cv.models.fsaf.utils import np_utils, eval_utils
 from taurus_cv.utils.spe import spe
 
+from taurus_cv.models.retinanet.model.resnet import resnet_retinanet
 
+
+# 暂时有问题
 def evaluate(args):
 
     time_start = time.time()
 
     model = retinanet(config)
+    # model, _ = resnet_retinanet(len(config.CLASS_MAPPING), backbone='resnet50', weights='imagenet', nms=True)
     model.load_weights(config.retinanet_weights, by_name=True)
 
     time_load_model = time.time() - time_start
@@ -42,7 +47,18 @@ def evaluate(args):
         if os.path.exists(img_info['filepath']):
 
             img = cv2.imread(img_info['filepath'])
-            _, _, detections = model.predict(np.expand_dims(img, axis=0))
+            img = preprocess_image(img.copy())
+            img, scale = resize_image(img, min_side=config.IMAGE_MIN_DIM, max_side=config.IMAGE_MAX_DIM)
+
+            _, _, detections = model.predict_on_batch(np.expand_dims(img, axis=0))
+
+            # bbox要取到边界内
+            detections[:, :, 0] = np.maximum(0, detections[:, :, 0])
+            detections[:, :, 1] = np.maximum(0, detections[:, :, 1])
+            detections[:, :, 2] = np.minimum(img.shape[1], detections[:, :, 2])
+            detections[:, :, 3] = np.minimum(img.shape[0], detections[:, :, 3])
+
+            detections[0, :, :4] /= scale
 
             scores = detections[0, :, 4:]
 
@@ -51,15 +67,14 @@ def evaluate(args):
             scores = scores[indices]
 
             # 排序选择前100个大的, 得到排序方式 比如[1,0,2]
-            sort_by_scores = np.argsort(-scores)[:100]
-            indices_sorted = [indices[0][sort_by_scores], indices[1][sort_by_scores]]
+            scores_sort = np.argsort(-scores)[:100]
+            # indices_sorted = [indices[0][sort_by_scores], indices[1][sort_by_scores]]
 
-            img_boxes = detections[0, indices_sorted[0], :4]
+            img_boxes = detections[0, indices[0][scores_sort], :4]
 
             # 取detection后面类别位，前4位是坐标
-            img_scores = np.expand_dims(detections[0, indices_sorted[0], 4 + indices_sorted[1]], axis=1)
-            img_detections = np.append(img_boxes, img_scores, axis=1)
-            img_labels = indices_sorted[1]
+            img_scores = np.expand_dims(detections[0, indices[0][scores_sort], 4 + indices[1][scores_sort]], axis=1)
+            img_labels = indices[1][scores_sort]
 
             # 添加到列表中
             predict_boxes.append(img_boxes)

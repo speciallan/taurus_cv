@@ -11,8 +11,10 @@ from taurus_cv.models.retinanet.model import tensorflow_backend
 def get_loss():
 
     return {
-        'regression': smooth_l1(),
-        'classification': focal()
+        'regression_ab': smooth_l1(),
+        'classification_ab': focal(),
+        'regression_af': smooth_l1(),
+        'classification_af': focal()
     }
 
 

@@ -19,16 +19,18 @@ from taurus_cv.models.fsaf.preprocessing.image import preprocess_image, resize_i
 from taurus_cv.models.fsaf.config import current_config as config
 from taurus_cv.utils.spe import spe
 
+from taurus_cv.models.retinanet.model.resnet import resnet_retinanet
 
 def inference(args):
 
     start_time = time.time()
 
     model = retinanet(config)
-    model.load_weights(config.retinanet_weights, by_name=True, skip_mismatch=True)
+    # model, _ = resnet_retinanet(len(config.CLASS_MAPPING), backbone='resnet50', weights='imagenet', nms=True)
+    model.load_weights(config.retinanet_weights, by_name=True)
 
     test_img_list = get_prepared_detection_dataset(config).get_all_data()
-    test_img_list = test_img_list[:100]
+    # test_img_list = test_img_list[:100]
 
     # 基本设置
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -37,12 +39,22 @@ def inference(args):
     classes = dict(zip(classes.values(), classes.keys()))
 
     for idx, img_info in enumerate(test_img_list):
+
         if os.path.exists(img_info['filepath']):
 
-            img = cv2.imread(img_info['filepath'])
-            # img = preprocess_image(img.copy())
-            # img, scale = resize_image(img, min_side=config.IMAGE_MIN_DIM, max_side=config.IMAGE_MAX_DIM)
-            _, _, detections = model.predict(np.expand_dims(img, axis=0))
+            origin_img = cv2.imread(img_info['filepath'])
+            img = preprocess_image(origin_img.copy())
+            img, scale = resize_image(img, min_side=config.IMAGE_MIN_DIM, max_side=config.IMAGE_MAX_DIM)
+
+            _, _, _, _, detections = model.predict(np.expand_dims(img, axis=0))
+
+            # bbox要取到边界内
+            detections[:, :, 0] = np.maximum(0, detections[:, :, 0])
+            detections[:, :, 1] = np.maximum(0, detections[:, :, 1])
+            detections[:, :, 2] = np.minimum(img.shape[1], detections[:, :, 2])
+            detections[:, :, 3] = np.minimum(img.shape[0], detections[:, :, 3])
+
+            detections[0, :, :4] /= scale
 
             scores = detections[0, :, 4:]
 
@@ -63,7 +75,7 @@ def inference(args):
             img_labels = indices_sorted[1]
 
             # 展示图片
-            show_img = img.copy()
+            show_img = origin_img.copy()
 
             # 画框
             if len(img_boxes) > 0:
