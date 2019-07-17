@@ -291,10 +291,10 @@ class Generator(object):
             regression_batch_af[index, ...] = anno[:, :5]
             labels_batch_af[index, ...] = to_categorical(anno[:, 4], self.num_classes())
 
-        spe(regression_batch_ab.shape, regression_batch_af.shape)
+        # spe(regression_batch_ab.shape, regression_batch_af.shape)
 
         # 四种损失 (1, 196416, 5) (1, 196416, 8) [1,21824,5] [1,21824,8]
-        return [regression_batch_ab, labels_batch_ab]
+        return [regression_batch_ab, labels_batch_ab, regression_batch_af, labels_batch_af]
 
     def compute_input_output(self, group):
 
