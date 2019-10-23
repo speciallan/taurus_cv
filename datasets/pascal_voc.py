@@ -78,6 +78,7 @@ def get_voc_dataset(input_path, sub_dir='VOC2007', class_mapping=[]):
                 # 解析基础图片数据
                 element_objs = element.findall('object')
                 element_filename = element.find('filename').text
+                element_filename = element_filename + '.jpg' if '.jpg' not in element_filename else element_filename
                 element_width = int(element.find('size').find('width').text)
                 element_height = int(element.find('size').find('height').text)
 
@@ -120,14 +121,15 @@ def get_voc_dataset(input_path, sub_dir='VOC2007', class_mapping=[]):
                     y1 = int(round(float(obj_bbox.find('ymin').text)))
                     x2 = int(round(float(obj_bbox.find('xmax').text)))
                     y2 = int(round(float(obj_bbox.find('ymax').text)))
-                    difficulty = int(element_obj.find('difficult').text) == 1
+                    # difficulty = int(element_obj.find('difficult').text) == 1
 
                     annotation_data['bboxes'].append(
                         {'class_name': class_name,
                          'class_id': class_mapping[class_name],
                          'x1': x1, 'x2': x2,
                          'y1': y1, 'y2': y2,
-                         'difficult': difficulty})
+                         # 'difficult': difficulty
+                         })
 
                 all_imgs.append(annotation_data)
 
