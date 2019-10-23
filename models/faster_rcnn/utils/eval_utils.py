@@ -60,13 +60,13 @@ def get_detections(boxes, scores, predict_labels, num_classes, score_shreshold=0
     return all_detections
 
 
-def get_annotations(image_info_list, num_classes, order=False):
+def get_annotations(image_info_list, num_classes, order=False, classes=[]):
     """
     获取所有的编著
     :param image_info_list: list of dict, 图像数据信息
                         image_info['boxes'] 是(n,4)数组,
                         image_info['labels'] 是(n,1)数组
-    :param num_classes: 类别数
+    :param classes: 类别
     :return: list of list of numpy(num_boxes,4)  [num_images,[num_classes,[num_gt,(y1,x1,y2,x2)]]]
              每张图像，每个类别的GT边框; 注意num_gt是变化的
     """
@@ -79,7 +79,8 @@ def get_annotations(image_info_list, num_classes, order=False):
             gt_boxes = gt_boxes[:,[1,0,3,2]]
         for class_id in range(num_classes):
             # [3,3,6,6] 获取class_id=6的索引[2,3], 通过[2,3]获取boxes
-            indices = np.where(image_info_list[image_idx]['labels'] == str(class_id))
+            # labels 'ship' class_id 0
+            indices = np.where(image_info_list[image_idx]['labels'] == classes[class_id])
             all_annotations[image_idx][class_id] = gt_boxes[indices]
 
     return all_annotations

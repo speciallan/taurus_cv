@@ -11,7 +11,7 @@ def get_callbacks(config):
                         save_best_only=True,
                         save_weights_only=True,
                         mode='min',
-                        period=2),
+                        period=1),
 
         ReduceLROnPlateau(monitor='val_loss', factor=0.5,
                           patience=max(5, config.patience / 10),
